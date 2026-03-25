@@ -1,0 +1,252 @@
+---
+title: "Dataflow Design for Local RAG"
+excerpt: "Architecting efficient dataflow pipelines for Retrieval-Augmented Generation systems with local deployment."
+coverImage: "/images/dataflow-rag.jpg"
+date: "2024-03-05"
+readTime: "15 min read"
+category: "Local LLM Guides"
+tags: ["RAG", "Dataflow", "Vector Database", "Local AI"]
+featuredHardware: ["ryzen-9-7950x", "samsung-990-pro-4tb", "gskill-trident-z5-128gb"]
+---
+
+# Dataflow Design for Local RAG
+
+Building efficient Retrieval-Augmented Generation systems requires careful dataflow architecture. This guide covers optimal pipeline design for local deployment.
+
+## System Architecture
+
+### Core Components
+1. **Document Processing Pipeline**
+2. **Vector Database Storage**
+3. **Retrieval Engine**
+4. **Generation Pipeline**
+
+### Data Flow Stages
+```
+Documents → Chunking → Embedding → Vector Store → Retrieval → Context → Generation
+```
+
+## Document Processing
+
+### Preprocessing Pipeline
+```python
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from sentence_transformers import SentenceTransformer
+
+# Optimal chunking for RAG
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000,
+    chunk_overlap=200,
+    length_function=len,
+)
+
+chunks = text_splitter.split_documents(documents)
+```
+
+### Embedding Strategy
+```python
+# Local embedding model
+embedder = SentenceTransformer('all-MiniLM-L6-v2')
+
+# Batch processing for efficiency
+def batch_embed(chunks, batch_size=32):
+    embeddings = []
+    for i in range(0, len(chunks), batch_size):
+        batch = chunks[i:i+batch_size]
+        batch_embeddings = embedder.encode(batch)
+        embeddings.extend(batch_embeddings)
+    return embeddings
+```
+
+## Vector Database Options
+
+### ChromaDB (Local)
+```python
+import chromadb
+
+client = chromadb.Client()
+collection = client.create_collection("documents")
+
+collection.add(
+    embeddings=embeddings,
+    documents=texts,
+    ids=[f"doc_{i}" for i in range(len(texts))]
+)
+```
+
+### FAISS (High Performance)
+```python
+import faiss
+import numpy as np
+
+dimension = 384  # Embedding dimension
+index = faiss.IndexFlatL2(dimension)
+
+index.add(np.array(embeddings).astype('float32'))
+```
+
+## Retrieval Optimization
+
+### Similarity Search
+```python
+def retrieve_relevant(query, k=5):
+    query_embedding = embedder.encode([query])
+    distances, indices = index.search(query_embedding, k)
+    
+    results = []
+    for dist, idx in zip(distances[0], indices[0]):
+        results.append({
+            'text': texts[idx],
+            'distance': dist,
+            'index': idx
+        })
+    return results
+```
+
+### Context Window Management
+```python
+def build_context(retrieved_docs, max_tokens=2048):
+    context = ""
+    current_tokens = 0
+    
+    for doc in retrieved_docs:
+        doc_tokens = len(doc['text'].split())
+        if current_tokens + doc_tokens <= max_tokens:
+            context += doc['text'] + "\n"
+            current_tokens += doc_tokens
+        else:
+            break
+    
+    return context
+```
+
+## Hardware Optimization
+
+### Memory Management
+- **RAM**: 32GB minimum for large document sets
+- **Storage**: NVMe for vector database operations
+- **CPU**: Multi-core for parallel processing
+
+### Storage Strategy
+```python
+# Persistent vector storage
+import pickle
+
+def save_vector_store(index, filepath):
+    with open(filepath, 'wb') as f:
+        pickle.dump(index, f)
+
+def load_vector_store(filepath):
+    with open(filepath, 'rb') as f:
+        return pickle.load(f)
+```
+
+## Performance Tuning
+
+### Batch Processing
+```python
+from concurrent.futures import ThreadPoolExecutor
+
+def parallel_embed(texts, num_workers=4):
+    with ThreadPoolExecutor(max_workers=num_workers) as executor:
+        futures = [executor.submit(embedder.encode, text) 
+                  for text in texts]
+        embeddings = [future.result() for future in futures]
+    return embeddings
+```
+
+### Caching Strategy
+```python
+import functools
+
+@functools.lru_cache(maxsize=1000)
+def cached_embedding(text):
+    return embedder.encode(text)
+```
+
+## Monitoring and Metrics
+
+### Performance Tracking
+```python
+import time
+
+def measure_performance(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        
+        print(f"{func.__name__}: {end_time - start_time:.2f}s")
+        return result
+    return wrapper
+```
+
+### Memory Monitoring
+```python
+import psutil
+
+def system_resources():
+    cpu_percent = psutil.cpu_percent()
+    memory_percent = psutil.virtual_memory().percent
+    
+    return {
+        'cpu': cpu_percent,
+        'memory': memory_percent
+    }
+```
+
+## Scaling Considerations
+
+### Multi-GPU Support
+```python
+import torch
+
+if torch.cuda.device_count() > 1:
+    embedder = embedder.to('cuda')
+    # Distribute embedding workload
+```
+
+### Distributed Processing
+```python
+from multiprocessing import Pool
+
+def process_document_batch(batch):
+    return [embedder.encode(doc) for doc in batch]
+
+with Pool(processes=4) as pool:
+    results = pool.map(process_document_batch, document_batches)
+```
+
+## Best Practices
+
+1. **Chunk Size**: 800-1200 tokens optimal balance
+2. **Overlap**: 15-20% prevents context loss
+3. **Embedding Model**: Balance quality vs speed
+4. **Vector Store**: Choose based on dataset size
+5. **Retrieval**: Top-K=5 typically sufficient
+
+## Troubleshooting
+
+### Common Issues
+- **Memory errors**: Reduce batch size
+- **Slow retrieval**: Optimize index structure
+- **Poor results**: Adjust chunking strategy
+
+### Debug Tools
+```python
+def debug_retrieval(query, expected_doc):
+    results = retrieve_relevant(query, k=10)
+    found = any(expected_doc in r['text'] for r in results)
+    print(f"Expected document found: {found}")
+    return results
+```
+
+## Conclusion
+
+Efficient RAG dataflow requires balancing accuracy, speed, and resource usage. Local deployment offers privacy and control while maintaining performance.
+
+## Featured Configuration
+
+Optimized RAG workstation:
+
+[View Complete Build](/hardware)

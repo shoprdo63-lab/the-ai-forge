@@ -1,0 +1,18 @@
+# World-Class UI/UX Engineering Standards
+
+1) Strict Component Library
+- Rule: "Use ONLY Shadcn/UI components for all interactive elements (Tables, Buttons, Inputs, Dialogs). Never build custom 'Card' layouts from scratch unless they follow the Shadcn/UI aesthetic."
+
+2) The 8px Grid & Alignment
+- Rule: "All spacing (padding, margin, gap) must follow a strict 8px grid system. Use exactly 16px or 24px for row padding. All table columns must be perfectly vertically aligned."
+
+3) Typography Hierarchy
+- Rule: "Set the global font to 'Inter'. Use font-weight: 600 for primary product names and font-weight: 400 with text-muted-foreground for technical specs. No font-size should be smaller than 12px."
+
+4) No Visual Fluff (The Anti-Amateur Rule)
+- Rule: "Delete all heavy gradients, glowing borders, and 'playful' icons. Use 1px solid borders with #e2e8f0 (or the dark mode equivalent). Use only thin-stroke Lucide-react icons."
+
+5) Strict Content Policy
+- Rule: "Never include images of people or immodest content. Use only high-resolution hardware renders or minimalist data visualizations."
+
+From now on, every time you refactor a page or add a feature (like the Blog or the Hardware Table), you must strictly follow these rules to ensure a World-Class, PC Part Picker-level UI.
