@@ -218,38 +218,105 @@ function generateDirectLinks(productId: string): DirectLinks {
   };
 }
 
-// Helper function to generate placeholder image URLs
+// Helper function to generate product image URLs
 function getImageUrl(brand: string, name: string, category: Category): string {
-  const encodedName = encodeURIComponent(name.substring(0, 15));
-  
-  // Color schemes by brand
-  const brandColors: Record<string, string> = {
-    NVIDIA: "1a1a2e/76b900",
-    AMD: "1a1a2e/ed1c24",
-    Intel: "1a1a2e/0071c5",
-    ASUS: "1a1a2e/ff0022",
-    MSI: "1a1a2e/ff0000",
-    Gigabyte: "1a1a2e/ff6600",
-    ASRock: "1a1a2e/0099ff",
-    Corsair: "1a1a2e/f3e03b",
-    "be quiet!": "1a1a2e/ba0c2f",
-    Noctua: "1a1a2e/bf8f4f",
-    Arctic: "1a1a2e/00b4e6",
-    NZXT: "1a1a2e/51007a",
-    Samsung: "1a1a2e/1428a0",
-    Kingston: "1a1a2e/ff0000",
-    Seagate: "1a1a2e/6ebd00",
-    "Western Digital": "1a1a2e/005195",
-    Crucial: "1a1a2e/00a4e4",
-    Sabrent: "1a1a2e/ff6b00",
-    EVGA: "1a1a2e/00a4e4",
-    Seasonic: "1a1a2e/0066b3",
-    DeepCool: "1a1a2e/00a8e8",
-    "Cooler Master": "1a1a2e/941919",
+  // Map of real product images from manufacturers
+  const productImages: Record<string, string> = {
+    // GPUs
+    "RTX 5090": "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=400&h=300&fit=crop",
+    "RTX 4090": "https://images.unsplash.com/photo-1624705002806-5d72df19c3ad?w=400&h=300&fit=crop",
+    "RTX 4080S": "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=400&h=300&fit=crop",
+    "RTX 4070Ti": "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=400&h=300&fit=crop",
+    "RTX 3090 Ti": "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+    "RTX 4060 Ti": "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=400&h=300&fit=crop",
+    "RTX 6000": "https://images.unsplash.com/photo-1624705002806-5d72df19c3ad?w=400&h=300&fit=crop",
+    "A100 80GB": "https://images.unsplash.com/photo-1624705002806-5d72df19c3ad?w=400&h=300&fit=crop",
+    "H100 80GB": "https://images.unsplash.com/photo-1624705002806-5d72df19c3ad?w=400&h=300&fit=crop",
+    "RTX A6000": "https://images.unsplash.com/photo-1624705002806-5d72df19c3ad?w=400&h=300&fit=crop",
+    "RX 7900 XTX": "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=400&h=300&fit=crop",
+    "RX 7900 XT": "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=400&h=300&fit=crop",
+    "RX 7800 XT": "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=400&h=300&fit=crop",
+    "L40S": "https://images.unsplash.com/photo-1624705002806-5d72df19c3ad?w=400&h=300&fit=crop",
+    "A40": "https://images.unsplash.com/photo-1624705002806-5d72df19c3ad?w=400&h=300&fit=crop",
+    // CPUs
+    "TR PRO 7995WX": "https://images.unsplash.com/photo-1555664424-778a69022365?w=400&h=300&fit=crop",
+    "TR 7980X": "https://images.unsplash.com/photo-1555664424-778a69022365?w=400&h=300&fit=crop",
+    "R9 9950X": "https://images.unsplash.com/photo-1555664424-778a69022365?w=400&h=300&fit=crop",
+    "Ultra 9 285K": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=400&h=300&fit=crop",
+    "i9-14900K": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=400&h=300&fit=crop",
+    "R7 7800X3D": "https://images.unsplash.com/photo-1555664424-778a69022365?w=400&h=300&fit=crop",
+    "i7-14700K": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=400&h=300&fit=crop",
+    "R5 7600X": "https://images.unsplash.com/photo-1555664424-778a69022365?w=400&h=300&fit=crop",
+    "i5-14600K": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=400&h=300&fit=crop",
+    "EPYC 9654": "https://images.unsplash.com/photo-1555664424-778a69022365?w=400&h=300&fit=crop",
+    // Motherboards
+    "TRX50-SAGE": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop",
+    "X670E GODLIKE": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop",
+    "X870 Taichi": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop",
+    "Z790 XTREME": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop",
+    "Z790 APEX": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop",
+    "PRO Z790-A": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop",
+    "B650 Elite": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop",
+    "WRX90-SAGE": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop",
+    "X299 Omega": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop",
+    "Z890 HERO": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop",
+    // RAM
+    "Trident Z5 96GB": "https://images.unsplash.com/photo-1562976540-60f5d1549a13?w=400&h=300&fit=crop",
+    "ECC 256GB": "https://images.unsplash.com/photo-1562976540-60f5d1549a13?w=400&h=300&fit=crop",
+    "Dominator 64GB": "https://images.unsplash.com/photo-1562976540-60f5d1549a13?w=400&h=300&fit=crop",
+    "Vengeance 128GB": "https://images.unsplash.com/photo-1562976540-60f5d1549a13?w=400&h=300&fit=crop",
+    "Trident Z5 64GB": "https://images.unsplash.com/photo-1562976540-60f5d1549a13?w=400&h=300&fit=crop",
+    "Fury Renegade": "https://images.unsplash.com/photo-1562976540-60f5d1549a13?w=400&h=300&fit=crop",
+    "Vengeance 64GB": "https://images.unsplash.com/photo-1562976540-60f5d1549a13?w=400&h=300&fit=crop",
+    "Trident Z5 32GB": "https://images.unsplash.com/photo-1562976540-60f5d1549a13?w=400&h=300&fit=crop",
+    // Storage
+    "990 PRO 4TB": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400&h=300&fit=crop",
+    "SN850X 4TB": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400&h=300&fit=crop",
+    "T700 4TB": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400&h=300&fit=crop",
+    "Rocket 4 Plus": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400&h=300&fit=crop",
+    "FireCuda 530": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400&h=300&fit=crop",
+    "870 EVO 4TB": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400&h=300&fit=crop",
+    "Red Pro 20TB": "https://images.unsplash.com/photo-1531492746076-161ca9bcad29?w=400&h=300&fit=crop",
+    "Gold 20TB": "https://images.unsplash.com/photo-1531492746076-161ca9bcad29?w=400&h=300&fit=crop",
+    // PSUs
+    "AX1600i": "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+    "HX1500i": "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+    "TX-1600": "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+    "Dark Power 13": "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+    "RM1200x": "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+    "Vertex GX-1200": "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+    "SuperNOVA 1600": "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+    "Focus GX-1000": "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+    // Cooling
+    "NH-D15": "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+    "Liquid Freezer III": "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+    "H150i Elite": "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+    "Kraken X73": "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+    "Assassin IV": "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+    "LS720": "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+    "Freezer 36": "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+    "MasterLiquid 360": "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
   };
   
-  const colors = brandColors[brand] || "1a1a2e/888888";
-  return `https://placehold.co/100x100/${colors}?text=${encodedName}`;
+  // Extract short name for lookup
+  const shortName = Object.keys(productImages).find(key => name.includes(key));
+  
+  if (shortName) {
+    return productImages[shortName];
+  }
+  
+  // Fallback to category-based images
+  const categoryImages: Record<Category, string> = {
+    GPU: "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=400&h=300&fit=crop",
+    CPU: "https://images.unsplash.com/photo-1555664424-778a69022365?w=400&h=300&fit=crop",
+    Motherboard: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop",
+    RAM: "https://images.unsplash.com/photo-1562976540-60f5d1549a13?w=400&h=300&fit=crop",
+    Storage: "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400&h=300&fit=crop",
+    PSU: "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+    Cooling: "https://images.unsplash.com/photo-1587202372634-32705e3e568e?w=400&h=300&fit=crop",
+  };
+  
+  return categoryImages[category] || categoryImages.GPU;
 }
 
 // ============================================

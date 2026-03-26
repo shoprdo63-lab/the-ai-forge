@@ -141,18 +141,48 @@ export default function ProductDetail({ component, similarProducts }: ProductDet
               </div>
             </div>
 
-            {/* Product Image Placeholder */}
-            <div className="aspect-video bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl flex items-center justify-center">
-              <div className="text-center">
-                {isGPU ? (
-                  <Monitor className="w-24 h-24 text-[#d1d5db] mx-auto mb-4" />
-                ) : isCPU ? (
-                  <Cpu className="w-24 h-24 text-[#d1d5db] mx-auto mb-4" />
-                ) : (
-                  <Zap className="w-24 h-24 text-[#d1d5db] mx-auto mb-4" />
-                )}
-                <p className="text-[#9ca3af]">{component.name}</p>
-              </div>
+            {/* Product Image */}
+            <div className="aspect-video bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl overflow-hidden">
+              {component.imageUrl ? (
+                <img
+                  src={component.imageUrl}
+                  alt={component.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to icon if image fails to load
+                    e.currentTarget.style.display = 'none';
+                    const parent = e.currentTarget.parentElement;
+                    if (parent) {
+                      parent.innerHTML = `
+                        <div class="flex items-center justify-center h-full">
+                          <div class="text-center">
+                            ${isGPU 
+                              ? '<svg class="w-24 h-24 text-[#d1d5db] mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>'
+                              : isCPU
+                                ? '<svg class="w-24 h-24 text-[#d1d5db] mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>'
+                                : '<svg class="w-24 h-24 text-[#d1d5db] mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'
+                            }
+                            <p class="text-[#9ca3af]">${component.name}</p>
+                          </div>
+                        </div>
+                      `;
+                    }
+                  }}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    {isGPU ? (
+                      <Monitor className="w-24 h-24 text-[#d1d5db] mx-auto mb-4" />
+                    ) : isCPU ? (
+                      <Cpu className="w-24 h-24 text-[#d1d5db] mx-auto mb-4" />
+                    ) : (
+                      <Zap className="w-24 h-24 text-[#d1d5db] mx-auto mb-4" />
+                    )}
+                    <p className="text-[#9ca3af]">{component.name}</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Tabs */}
@@ -239,8 +269,19 @@ export default function ProductDetail({ component, similarProducts }: ProductDet
                       className="bg-white border border-[#e5e5e5] rounded-lg p-4 hover:border-[#4f46e5]/30 hover:shadow-md transition-all"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-[#f5f5f5] rounded flex items-center justify-center">
-                          {product.category === "GPU" ? <Monitor className="w-6 h-6 text-[#9ca3af]" /> : <Cpu className="w-6 h-6 text-[#9ca3af]" />}
+                        <div className="w-12 h-12 bg-[#f5f5f5] rounded flex items-center justify-center overflow-hidden shrink-0">
+                          {product.imageUrl ? (
+                            <img
+                              src={product.imageUrl}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            product.category === "GPU" ? <Monitor className="w-6 h-6 text-[#9ca3af]" /> : <Cpu className="w-6 h-6 text-[#9ca3af]" />
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-[#0a0a0a] truncate">{product.name}</p>
