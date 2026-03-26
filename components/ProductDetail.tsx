@@ -77,13 +77,13 @@ export default function ProductDetail({ component, similarProducts }: ProductDet
   };
 
   return (
-    <div className="min-h-screen bg-[#0f0f13]">
+    <div className="min-h-screen bg-white">
       {/* Breadcrumb */}
-      <div className="border-b border-[#2a2a30]">
+      <div className="bg-[#f5f5f5] border-b border-[#e5e5e5]">
         <div className="max-w-[1400px] mx-auto px-4 py-3">
           <Link
             href="/products"
-            className="inline-flex items-center gap-2 text-sm text-[#666] hover:text-[#00d4aa] transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-[#6b7280] hover:text-[#4f46e5] transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Products
@@ -99,29 +99,29 @@ export default function ProductDetail({ component, similarProducts }: ProductDet
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="px-2 py-1 bg-[#00d4aa]/10 text-[#00d4aa] text-xs font-medium rounded">
+                  <span className="px-2 py-1 bg-[#0d9488]/10 text-[#0d9488] text-xs font-medium rounded">
                     {component.category}
                   </span>
-                  <span className="px-2 py-1 bg-[#1a1a1f] text-[#aaa] text-xs rounded">
+                  <span className="px-2 py-1 bg-[#f5f5f5] text-[#6b7280] text-xs rounded">
                     {component.brand}
                   </span>
                   {component.inStock ? (
-                    <span className="flex items-center gap-1 px-2 py-1 bg-green-500/10 text-green-500 text-xs rounded">
+                    <span className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
                       <Check className="w-3 h-3" />
                       In Stock
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1 px-2 py-1 bg-red-500/10 text-red-500 text-xs rounded">
+                    <span className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 text-xs rounded">
                       <AlertCircle className="w-3 h-3" />
                       Out of Stock
                     </span>
                   )}
                 </div>
-                <h1 className="text-3xl font-bold text-white mb-2">{component.name}</h1>
+                <h1 className="text-3xl font-bold text-[#0a0a0a] mb-2">{component.name}</h1>
                 <div className="flex items-center gap-4">
                   <StarRating score={component.aiScore} />
-                  <span className="text-[#666]">|</span>
-                  <span className="text-sm text-[#aaa]">AI Score: {component.aiScore}/100</span>
+                  <span className="text-[#d1d5db]">|</span>
+                  <span className="text-sm text-[#6b7280]">AI Score: {component.aiScore}/100</span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -129,34 +129,34 @@ export default function ProductDetail({ component, similarProducts }: ProductDet
                   onClick={() => setIsFavorite(!isFavorite)}
                   className={`p-2 rounded-lg border transition-colors ${
                     isFavorite 
-                      ? "bg-red-500/10 border-red-500/30 text-red-500" 
-                      : "bg-[#1a1a1f] border-[#2a2a30] text-[#666] hover:text-white"
+                      ? "bg-red-50 border-red-200 text-red-500" 
+                      : "bg-white border-[#e5e5e5] text-[#9ca3af] hover:text-[#6b7280]"
                   }`}
                 >
                   <Heart className={`w-5 h-5 ${isFavorite ? "fill-current" : ""}`} />
                 </button>
-                <button className="p-2 bg-[#1a1a1f] border border-[#2a2a30] rounded-lg text-[#666] hover:text-white transition-colors">
+                <button className="p-2 bg-white border border-[#e5e5e5] rounded-lg text-[#9ca3af] hover:text-[#6b7280] transition-colors">
                   <Share2 className="w-5 h-5" />
                 </button>
               </div>
             </div>
 
             {/* Product Image Placeholder */}
-            <div className="aspect-video bg-[#1a1a1f] border border-[#2a2a30] rounded-xl flex items-center justify-center">
+            <div className="aspect-video bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl flex items-center justify-center">
               <div className="text-center">
                 {isGPU ? (
-                  <Monitor className="w-24 h-24 text-[#333] mx-auto mb-4" />
+                  <Monitor className="w-24 h-24 text-[#d1d5db] mx-auto mb-4" />
                 ) : isCPU ? (
-                  <Cpu className="w-24 h-24 text-[#333] mx-auto mb-4" />
+                  <Cpu className="w-24 h-24 text-[#d1d5db] mx-auto mb-4" />
                 ) : (
-                  <Zap className="w-24 h-24 text-[#333] mx-auto mb-4" />
+                  <Zap className="w-24 h-24 text-[#d1d5db] mx-auto mb-4" />
                 )}
-                <p className="text-[#555]">{component.name}</p>
+                <p className="text-[#9ca3af]">{component.name}</p>
               </div>
             </div>
 
             {/* Tabs */}
-            <div className="border-b border-[#2a2a30]">
+            <div className="border-b border-[#e5e5e5]">
               <div className="flex gap-6">
                 {["specs", "benchmarks", "reviews"].map((tab) => (
                   <button
@@ -164,8 +164,8 @@ export default function ProductDetail({ component, similarProducts }: ProductDet
                     onClick={() => setActiveTab(tab as any)}
                     className={`py-3 text-sm font-medium capitalize border-b-2 transition-colors ${
                       activeTab === tab
-                        ? "text-[#00d4aa] border-[#00d4aa]"
-                        : "text-[#666] border-transparent hover:text-white"
+                        ? "text-[#4f46e5] border-[#4f46e5]"
+                        : "text-[#6b7280] border-transparent hover:text-[#0a0a0a]"
                     }`}
                   >
                     {tab}
@@ -177,38 +177,38 @@ export default function ProductDetail({ component, similarProducts }: ProductDet
             {/* Tab Content */}
             {activeTab === "specs" && (
               <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-white">Specifications</h2>
+                <h2 className="text-lg font-semibold text-[#0a0a0a]">Specifications</h2>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {Object.entries(component.specs).filter(([_, v]) => v).map(([key, value]) => (
-                    <div key={key} className="flex justify-between py-3 border-b border-[#2a2a30]">
-                      <span className="text-[#888] capitalize">{key.replace(/([A-Z])/g, " $1").trim()}</span>
-                      <span className="text-white font-medium">{value}</span>
+                    <div key={key} className="flex justify-between py-3 border-b border-[#e5e5e5]">
+                      <span className="text-[#6b7280] capitalize">{key.replace(/([A-Z])/g, " $1").trim()}</span>
+                      <span className="text-[#0a0a0a] font-medium">{value}</span>
                     </div>
                   ))}
                 </div>
                 <div className="pt-4">
-                  <p className="text-[#aaa] leading-relaxed">{component.description}</p>
+                  <p className="text-[#6b7280] leading-relaxed">{component.description}</p>
                 </div>
               </div>
             )}
 
             {activeTab === "benchmarks" && (
               <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-white">AI Performance Benchmarks</h2>
+                <h2 className="text-lg font-semibold text-[#0a0a0a]">AI Performance Benchmarks</h2>
                 <div className="space-y-4">
                   {[
                     { label: "LLM Inference (Llama 2 70B)", value: component.aiScore, unit: "tokens/sec" },
                     { label: "Image Generation (Stable Diffusion)", value: Math.round(component.aiScore * 0.8), unit: "img/min" },
                     { label: "Training Throughput", value: Math.round(component.aiScore * 0.6), unit: "samples/sec" },
                   ].map((bench) => (
-                    <div key={bench.label} className="bg-[#1a1a1f] rounded-lg p-4">
+                    <div key={bench.label} className="bg-[#f5f5f5] rounded-lg p-4">
                       <div className="flex justify-between mb-2">
-                        <span className="text-[#aaa]">{bench.label}</span>
-                        <span className="text-[#00d4aa] font-mono">{bench.value} {bench.unit}</span>
+                        <span className="text-[#6b7280]">{bench.label}</span>
+                        <span className="text-[#0d9488] font-mono font-medium">{bench.value} {bench.unit}</span>
                       </div>
-                      <div className="h-2 bg-[#252525] rounded-full overflow-hidden">
+                      <div className="h-2 bg-[#e5e5e5] rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-gradient-to-r from-[#00d4aa] to-[#00b894] rounded-full"
+                          className="h-full bg-gradient-to-r from-[#0d9488] to-[#14b8a6] rounded-full"
                           style={{ width: `${bench.value}%` }}
                         />
                       </div>
@@ -220,33 +220,33 @@ export default function ProductDetail({ component, similarProducts }: ProductDet
 
             {activeTab === "reviews" && (
               <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-white">User Reviews</h2>
-                <div className="text-center py-12">
-                  <p className="text-[#666]">Reviews coming soon...</p>
+                <h2 className="text-lg font-semibold text-[#0a0a0a]">User Reviews</h2>
+                <div className="text-center py-12 bg-[#f5f5f5] rounded-lg">
+                  <p className="text-[#9ca3af]">Reviews coming soon...</p>
                 </div>
               </div>
             )}
 
             {/* Similar Products */}
             {similarProducts.length > 0 && (
-              <div className="pt-6 border-t border-[#2a2a30]">
-                <h2 className="text-lg font-semibold text-white mb-4">Similar Products</h2>
+              <div className="pt-6 border-t border-[#e5e5e5]">
+                <h2 className="text-lg font-semibold text-[#0a0a0a] mb-4">Similar Products</h2>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {similarProducts.slice(0, 2).map((product) => (
                     <Link
                       key={product.id}
                       href={`/product/${product.id}`}
-                      className="bg-[#1a1a1f] border border-[#2a2a30] rounded-lg p-4 hover:border-[#00d4aa]/30 transition-colors"
+                      className="bg-white border border-[#e5e5e5] rounded-lg p-4 hover:border-[#4f46e5]/30 hover:shadow-md transition-all"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-[#252525] rounded flex items-center justify-center">
-                          {product.category === "GPU" ? <Monitor className="w-6 h-6 text-[#666]" /> : <Cpu className="w-6 h-6 text-[#666]" />}
+                        <div className="w-12 h-12 bg-[#f5f5f5] rounded flex items-center justify-center">
+                          {product.category === "GPU" ? <Monitor className="w-6 h-6 text-[#9ca3af]" /> : <Cpu className="w-6 h-6 text-[#9ca3af]" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-white truncate">{product.name}</p>
-                          <p className="text-xs text-[#666]">{product.brand}</p>
+                          <p className="text-sm font-medium text-[#0a0a0a] truncate">{product.name}</p>
+                          <p className="text-xs text-[#6b7280]">{product.brand}</p>
                         </div>
-                        <span className="text-[#00d4aa] font-semibold">${product.price}</span>
+                        <span className="text-[#0d9488] font-semibold">${product.price}</span>
                       </div>
                     </Link>
                   ))}
@@ -259,10 +259,10 @@ export default function ProductDetail({ component, similarProducts }: ProductDet
           <div className="lg:col-span-1">
             <div className="sticky top-20 space-y-4">
               {/* Price Comparison */}
-              <div className="bg-[#1a1a1f] border border-[#2a2a30] rounded-xl p-6">
+              <div className="bg-white border border-[#e5e5e5] rounded-xl p-6 shadow-sm">
                 <div className="flex items-baseline gap-2 mb-4">
-                  <span className="text-3xl font-bold text-[#00d4aa]">${lowestPrice.toLocaleString()}</span>
-                  <span className="text-[#666]">Lowest Price</span>
+                  <span className="text-3xl font-bold text-[#0d9488]">${lowestPrice.toLocaleString()}</span>
+                  <span className="text-[#9ca3af]">Lowest Price</span>
                 </div>
 
                 {/* Store List */}
@@ -274,18 +274,18 @@ export default function ProductDetail({ component, similarProducts }: ProductDet
                         href={data.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center justify-between p-3 bg-[#252525] rounded-lg hover:bg-[#303035] transition-colors group"
+                        className="flex items-center justify-between p-3 bg-[#f5f5f5] rounded-lg hover:bg-[#e5e5e5] transition-colors group"
                       >
                         <div className="flex items-center gap-3">
                           <div className={`w-2 h-2 rounded-full ${data.inStock ? "bg-green-500" : "bg-red-500"}`} />
-                          <span className="text-sm text-white capitalize">{store}</span>
+                          <span className="text-sm text-[#0a0a0a] capitalize">{store}</span>
                           {data.price === lowestPrice && data.inStock && (
-                            <span className="px-2 py-0.5 bg-[#00d4aa]/20 text-[#00d4aa] text-xs rounded">Best</span>
+                            <span className="px-2 py-0.5 bg-[#0d9488]/10 text-[#0d9488] text-xs rounded">Best</span>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-white font-medium">${data.price}</span>
-                          <ExternalLink className="w-4 h-4 text-[#666] group-hover:text-white" />
+                          <span className="text-[#0a0a0a] font-medium">${data.price}</span>
+                          <ExternalLink className="w-4 h-4 text-[#9ca3af] group-hover:text-[#6b7280]" />
                         </div>
                       </a>
                     ))
@@ -303,8 +303,8 @@ export default function ProductDetail({ component, similarProducts }: ProductDet
                 </div>
 
                 {/* Additional Stores */}
-                <div className="mt-4 pt-4 border-t border-[#2a2a30]">
-                  <p className="text-xs text-[#666] mb-3">Also available at:</p>
+                <div className="mt-4 pt-4 border-t border-[#e5e5e5]">
+                  <p className="text-xs text-[#9ca3af] mb-3">Also available at:</p>
                   <div className="flex flex-wrap gap-2">
                     {component.directLinks?.ebay && (
                       <a
@@ -331,29 +331,29 @@ export default function ProductDetail({ component, similarProducts }: ProductDet
               </div>
 
               {/* AI Score Card */}
-              <div className="bg-[#1a1a1f] border border-[#2a2a30] rounded-xl p-6">
+              <div className="bg-white border border-[#e5e5e5] rounded-xl p-6 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-[#00d4aa]/10 rounded-lg">
-                    <TrendingUp className="w-5 h-5 text-[#00d4aa]" />
+                  <div className="p-2 bg-[#0d9488]/10 rounded-lg">
+                    <TrendingUp className="w-5 h-5 text-[#0d9488]" />
                   </div>
                   <div>
-                    <p className="text-sm text-[#aaa]">AI Performance Score</p>
-                    <p className="text-2xl font-bold text-white">{component.aiScore}/100</p>
+                    <p className="text-sm text-[#6b7280]">AI Performance Score</p>
+                    <p className="text-2xl font-bold text-[#0a0a0a]">{component.aiScore}/100</p>
                   </div>
                 </div>
-                <div className="h-2 bg-[#252525] rounded-full overflow-hidden mb-2">
+                <div className="h-2 bg-[#e5e5e5] rounded-full overflow-hidden mb-2">
                   <div 
-                    className="h-full bg-gradient-to-r from-[#00d4aa] to-[#00b894] rounded-full"
+                    className="h-full bg-gradient-to-r from-[#0d9488] to-[#14b8a6] rounded-full"
                     style={{ width: `${component.aiScore}%` }}
                   />
                 </div>
-                <p className="text-xs text-[#666]">Based on LLM inference, training, and efficiency benchmarks</p>
+                <p className="text-xs text-[#9ca3af]">Based on LLM inference, training, and efficiency benchmarks</p>
               </div>
 
               {/* Compare Button */}
               <Link
                 href={`/compare?id1=${component.id}`}
-                className="flex items-center justify-center gap-2 w-full py-3 bg-[#252525] hover:bg-[#303035] text-white font-medium rounded-lg border border-[#2a2a30] transition-colors"
+                className="flex items-center justify-center gap-2 w-full py-3 bg-white hover:bg-[#f5f5f5] text-[#0a0a0a] font-medium rounded-lg border border-[#e5e5e5] transition-colors"
               >
                 <Scale className="w-5 h-5" />
                 Compare with Similar

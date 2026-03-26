@@ -8,6 +8,7 @@ import {
 } from "@/lib/constants";
 import Navbar from "@/components/Navbar";
 import ProductDetail from "@/components/ProductDetail";
+import Footer from "@/components/Footer";
 import ProductReviews from "@/components/ProductReviews";
 
 // Generate static paths for all products
@@ -225,7 +226,7 @@ export default async function ProductPage({
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-zinc-100">
+    <div className="min-h-screen bg-[#f5f5f5]">
       {/* JSON-LD Structured Data */}
       <script
         type="application/ld+json"
@@ -234,9 +235,11 @@ export default async function ProductPage({
 
       <Navbar />
 
-      <main className="min-h-screen bg-[#0f0f13]">
+      <main className="min-h-screen bg-white">
         <ProductDetail component={component} similarProducts={similarProducts} />
       </main>
+
+      <Footer />
     </div>
   );
 }
