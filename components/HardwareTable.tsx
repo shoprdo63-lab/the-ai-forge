@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Package, Plus, Check, Star } from "lucide-react";
+import { ExternalLink, Plus, Check, Star } from "lucide-react";
 import { hardwareComponents, type HardwareComponent } from "@/data/components";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { generateDeepProductLink, generateAllDeepProductLinks } from "@/lib/affiliate";
 
 const SIDEBAR_WIDTH = 280;
 const GAP = 32;
@@ -271,6 +272,7 @@ export default function HardwareTable() {
                   <TableHead className="w-32 px-3 py-3 text-sm font-semibold text-gray-700">Architecture</TableHead>
                   <TableHead className="w-24 px-3 py-3 text-sm font-semibold text-gray-700 text-right">Price</TableHead>
                   <TableHead className="w-24 px-3 py-3 text-sm font-semibold text-gray-700 text-center">Rating</TableHead>
+                  <TableHead className="w-28 px-3 py-3 text-sm font-semibold text-gray-700 text-center">Stores</TableHead>
                   <TableHead className="w-20 px-3 py-3"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -281,7 +283,7 @@ export default function HardwareTable() {
                     className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                   >
                     <TableCell className="px-3 py-2">
-                      <span className="text-gray-400"><Package className="h-4 w-4" /></span>
+                      <span className="text-gray-400"><ExternalLink className="h-4 w-4" /></span>
                     </TableCell>
                     <TableCell className="px-3 py-2">
                       <div className="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex items-center justify-center">
@@ -310,6 +312,40 @@ export default function HardwareTable() {
                     <TableCell className="px-3 py-2 text-center">
                       <StarRating rating={Math.floor(Math.random() * 2) + 4} />
                       <p className="text-xs text-gray-400 mt-0.5">({Math.floor(Math.random() * 500) + 50})</p>
+                    </TableCell>
+                    <TableCell className="px-3 py-2 text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <a
+                          href={generateDeepProductLink(product.id, "amazon")}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] px-1.5 py-0.5 bg-[#ff9900] text-white rounded font-medium hover:opacity-80 transition-opacity"
+                          onClick={(e) => e.stopPropagation()}
+                          title="Amazon"
+                        >
+                          A
+                        </a>
+                        <a
+                          href={generateDeepProductLink(product.id, "ebay")}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] px-1.5 py-0.5 bg-[#e53238] text-white rounded font-medium hover:opacity-80 transition-opacity"
+                          onClick={(e) => e.stopPropagation()}
+                          title="eBay"
+                        >
+                          E
+                        </a>
+                        <a
+                          href={generateDeepProductLink(product.id, "aliexpress")}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] px-1.5 py-0.5 bg-[#ff4747] text-white rounded font-medium hover:opacity-80 transition-opacity"
+                          onClick={(e) => e.stopPropagation()}
+                          title="AliExpress"
+                        >
+                          Al
+                        </a>
+                      </div>
                     </TableCell>
                     <TableCell className="px-3 py-2">
                       <button
