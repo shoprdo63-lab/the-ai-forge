@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { 
   ExternalLink, 
   ShoppingCart, 
@@ -12,10 +12,13 @@ import {
   Search,
   X,
   Monitor,
-  Cpu
+  Cpu,
+  HardDrive,
+  Zap,
+  Scale,
+  ArrowUpDown
 } from "lucide-react";
-import { hardwareComponents, type HardwareComponent } from "@/data/components";
-import { Slider } from "@/components/ui/slider";
+import { hardwareComponents, type HardwareComponent, type Category } from "@/data/components";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
@@ -27,21 +30,32 @@ import {
 } from "@/components/ui/table";
 
 // ============================================
-// FILTER TYPES & CONSTANTS
+// FILTER & SORT TYPES
 // ============================================
 
+type SortOption = 
+  | "popular" 
+  | "price-asc" 
+  | "price-desc" 
+  | "name-asc" 
+  | "name-desc"
+  | "vram-asc"
+  | "vram-desc"
+  | "rating-asc"
+  | "rating-desc";
+
 interface Filters {
-  selectedMemory: string[];
-  priceRange: [number, number];
+  selectedCategories: Category[];
   selectedManufacturers: string[];
+  selectedMemory: string[];
+  priceMin: number;
+  priceMax: number;
   searchQuery: string;
 }
 
-const MANUFACTURERS = ["NVIDIA", "AMD", "Intel"];
-const MEMORY_SIZES = ["8GB", "12GB", "16GB", "20GB", "24GB", "32GB", "48GB", "80GB"];
-
-const PRICE_MIN = 0;
-const PRICE_MAX = 30000;
+const MANUFACTURERS = ["NVIDIA", "AMD", "Intel", "ASUS", "MSI", "Gigabyte", "ASRock", "Corsair", "G.Skill", "Kingston", "Samsung", "Western Digital"];
+const MEMORY_SIZES = ["8GB", "12GB", "16GB", "20GB", "24GB", "32GB", "48GB", "80GB", "96GB", "256GB"];
+const CATEGORIES: Category[] = ["GPU", "CPU", "Motherboard", "RAM", "Storage", "PSU", "Cooling"];
 
 // ============================================
 // HELPER FUNCTIONS
@@ -53,51 +67,79 @@ function extractVram(specs: HardwareComponent["specs"]): number {
   return match ? parseInt(match[1], 10) : 0;
 }
 
-function formatClockSpeed(specs: HardwareComponent["specs"]): string {
-  if (specs.clock) return specs.clock;
-  if (specs.cuda) return `${specs.cuda} CUDA`;
-  return "-";
+function formatPricePerGB(price: number, vram: number): string {
+  if (vram === 0) return "-";
+  return `$${(price / vram).toFixed(2)}`;
 }
 
-function formatTDP(specs: HardwareComponent["specs"]): string {
-  return specs.tdp || "-";
-}
+// Category-specific column definitions (PCPartPicker style)
+const GPU_COLUMNS = [
+  { key: "select", label: "", width: "w-8" },
+  { key: "name", label: "Name", width: "flex-1" },
+  { key: "chipset", label: "Chipset", width: "w-28", align: "center" },
+  { key: "memory", label: "Memory", width: "w-20", align: "center" },
+  { key: "coreClock", label: "Core Clock", width: "w-28", align: "center" },
+  { key: "boostClock", label: "Boost Clock", width: "w-28", align: "center" },
+  { key: "tdp", label: "TDP", width: "w-16", align: "center" },
+  { key: "rating", label: "Rating", width: "w-20", align: "center" },
+  { key: "price", label: "Price", width: "w-24", align: "right" },
+  { key: "buy", label: "", width: "w-20", align: "center" },
+];
 
-// Amazon Logo SVG
-function AmazonLogo() {
-  return (
-    <svg viewBox="0 0 100 30" className="h-4 w-auto" fill="currentColor">
-      <text x="0" y="22" fontSize="14" fontWeight="700">amazon</text>
-      <text x="58" y="12" fontSize="8" fill="#ff9900">prime</text>
-    </svg>
-  );
-}
+const CPU_COLUMNS = [
+  { key: "select", label: "", width: "w-8" },
+  { key: "name", label: "Name", width: "flex-1" },
+  { key: "coreCount", label: "Core Count", width: "w-24", align: "center" },
+  { key: "coreClock", label: "Perf. Core Clock", width: "w-32", align: "center" },
+  { key: "boostClock", label: "Boost Clock", width: "w-28", align: "center" },
+  { key: "microarchitecture", label: "Microarchitecture", width: "w-28", align: "center" },
+  { key: "tdp", label: "TDP", width: "w-16", align: "center" },
+  { key: "rating", label: "Rating", width: "w-20", align: "center" },
+  { key: "price", label: "Price", width: "w-24", align: "right" },
+  { key: "buy", label: "", width: "w-20", align: "center" },
+];
 
-// AliExpress Logo SVG
-function AliExpressLogo() {
-  return (
-    <svg viewBox="0 0 90 20" className="h-4 w-auto" fill="currentColor">
-      <text x="0" y="14" fontSize="10" fontWeight="600">AliExpress</text>
-    </svg>
-  );
-}
+const RAM_COLUMNS = [
+  { key: "select", label: "", width: "w-8" },
+  { key: "name", label: "Name", width: "flex-1" },
+  { key: "speed", label: "Speed", width: "w-24", align: "center" },
+  { key: "modules", label: "Modules", width: "w-24", align: "center" },
+  { key: "pricePerGB", label: "Price / GB", width: "w-24", align: "center" },
+  { key: "color", label: "Color", width: "w-20", align: "center" },
+  { key: "casLatency", label: "CAS Latency", width: "w-24", align: "center" },
+  { key: "rating", label: "Rating", width: "w-20", align: "center" },
+  { key: "price", label: "Price", width: "w-24", align: "right" },
+  { key: "buy", label: "", width: "w-20", align: "center" },
+];
+
+const GENERIC_COLUMNS = [
+  { key: "select", label: "", width: "w-8" },
+  { key: "name", label: "Name", width: "flex-1" },
+  { key: "specs", label: "Specs", width: "w-48", align: "center" },
+  { key: "rating", label: "Rating", width: "w-20", align: "center" },
+  { key: "price", label: "Price", width: "w-24", align: "right" },
+  { key: "buy", label: "", width: "w-20", align: "center" },
+];
 
 // ============================================
-// PCPartPicker STYLE SIDEBAR
+// FILTER SIDEBAR
 // ============================================
 
 function FilterSidebar({
   filters,
   setFilters,
   resultCount,
+  activeCategory,
 }: {
   filters: Filters;
   setFilters: React.Dispatch<React.SetStateAction<Filters>>;
   resultCount: number;
+  activeCategory: Category | null;
 }) {
   const [expandedSections, setExpandedSections] = useState({
+    category: true,
     manufacturer: true,
-    memory: true,
+    memory: false,
     price: true,
   });
 
@@ -107,18 +149,21 @@ function FilterSidebar({
 
   const clearFilters = () => {
     setFilters({
-      selectedMemory: [],
-      priceRange: [PRICE_MIN, PRICE_MAX],
+      selectedCategories: [],
       selectedManufacturers: [],
+      selectedMemory: [],
+      priceMin: 0,
+      priceMax: 30000,
       searchQuery: "",
     });
   };
 
   const hasActiveFilters = 
-    filters.selectedMemory.length > 0 ||
-    filters.priceRange[0] > PRICE_MIN || 
-    filters.priceRange[1] < PRICE_MAX ||
+    filters.selectedCategories.length > 0 ||
     filters.selectedManufacturers.length > 0 ||
+    filters.selectedMemory.length > 0 ||
+    filters.priceMin > 0 ||
+    filters.priceMax < 30000 ||
     filters.searchQuery.length > 0;
 
   return (
@@ -160,6 +205,45 @@ function FilterSidebar({
           )}
         </div>
 
+        {/* Category Filter */}
+        <div className="border-b border-[#2a2a30] pb-4">
+          <button
+            onClick={() => toggleSection("category")}
+            className="flex items-center justify-between w-full mb-3"
+          >
+            <span className="text-xs font-semibold text-[#888] uppercase tracking-wider">
+              Category
+            </span>
+            {expandedSections.category ? (
+              <ChevronUp className="w-3 h-3 text-[#666]" />
+            ) : (
+              <ChevronDown className="w-3 h-3 text-[#666]" />
+            )}
+          </button>
+          {expandedSections.category && (
+            <div className="space-y-2">
+              {CATEGORIES.map((category) => (
+                <label key={category} className="flex items-center gap-2 cursor-pointer group">
+                  <Checkbox
+                    checked={filters.selectedCategories.includes(category)}
+                    onCheckedChange={(checked) => {
+                      setFilters((prev) => ({
+                        ...prev,
+                        selectedCategories: checked
+                          ? [...prev.selectedCategories, category]
+                          : prev.selectedCategories.filter((c) => c !== category),
+                      }));
+                    }}
+                  />
+                  <span className="text-sm text-[#aaa] group-hover:text-white transition-colors">
+                    {category}
+                  </span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Manufacturer Filter */}
         <div className="border-b border-[#2a2a30] pb-4">
           <button
@@ -176,7 +260,7 @@ function FilterSidebar({
             )}
           </button>
           {expandedSections.manufacturer && (
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-40 overflow-y-auto">
               {MANUFACTURERS.map((manufacturer) => (
                 <label key={manufacturer} className="flex items-center gap-2 cursor-pointer group">
                   <Checkbox
@@ -199,44 +283,46 @@ function FilterSidebar({
           )}
         </div>
 
-        {/* Memory Size Filter */}
-        <div className="border-b border-[#2a2a30] pb-4">
-          <button
-            onClick={() => toggleSection("memory")}
-            className="flex items-center justify-between w-full mb-3"
-          >
-            <span className="text-xs font-semibold text-[#888] uppercase tracking-wider">
-              Memory
-            </span>
-            {expandedSections.memory ? (
-              <ChevronUp className="w-3 h-3 text-[#666]" />
-            ) : (
-              <ChevronDown className="w-3 h-3 text-[#666]" />
+        {/* Memory Size Filter - Show only for GPU or when no category selected */}
+        {(!activeCategory || activeCategory === "GPU") && (
+          <div className="border-b border-[#2a2a30] pb-4">
+            <button
+              onClick={() => toggleSection("memory")}
+              className="flex items-center justify-between w-full mb-3"
+            >
+              <span className="text-xs font-semibold text-[#888] uppercase tracking-wider">
+                Memory
+              </span>
+              {expandedSections.memory ? (
+                <ChevronUp className="w-3 h-3 text-[#666]" />
+              ) : (
+                <ChevronDown className="w-3 h-3 text-[#666]" />
+              )}
+            </button>
+            {expandedSections.memory && (
+              <div className="space-y-2">
+                {MEMORY_SIZES.map((size) => (
+                  <label key={size} className="flex items-center gap-2 cursor-pointer group">
+                    <Checkbox
+                      checked={filters.selectedMemory.includes(size)}
+                      onCheckedChange={(checked) => {
+                        setFilters((prev) => ({
+                          ...prev,
+                          selectedMemory: checked
+                            ? [...prev.selectedMemory, size]
+                            : prev.selectedMemory.filter((s) => s !== size),
+                        }));
+                      }}
+                    />
+                    <span className="text-sm text-[#aaa] group-hover:text-white transition-colors">
+                      {size}
+                    </span>
+                  </label>
+                ))}
+              </div>
             )}
-          </button>
-          {expandedSections.memory && (
-            <div className="space-y-2">
-              {MEMORY_SIZES.map((size) => (
-                <label key={size} className="flex items-center gap-2 cursor-pointer group">
-                  <Checkbox
-                    checked={filters.selectedMemory.includes(size)}
-                    onCheckedChange={(checked) => {
-                      setFilters((prev) => ({
-                        ...prev,
-                        selectedMemory: checked
-                          ? [...prev.selectedMemory, size]
-                          : prev.selectedMemory.filter((s) => s !== size),
-                      }));
-                    }}
-                  />
-                  <span className="text-sm text-[#aaa] group-hover:text-white transition-colors">
-                    {size}
-                  </span>
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Price Range */}
         <div className="pb-4">
@@ -255,18 +341,21 @@ function FilterSidebar({
           </button>
           {expandedSections.price && (
             <div className="space-y-3">
-              <Slider
-                value={filters.priceRange}
-                min={PRICE_MIN}
-                max={PRICE_MAX}
-                step={100}
-                onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, priceRange: value as [number, number] }))
-                }
-              />
-              <div className="flex justify-between text-xs text-[#666] font-mono">
-                <span>${filters.priceRange[0].toLocaleString()}</span>
-                <span>${filters.priceRange[1].toLocaleString()}</span>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  value={filters.priceMin || ""}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, priceMin: parseInt(e.target.value) || 0 }))}
+                  className="w-full px-2 py-1.5 bg-[#0a0a0f] border border-[#2a2a30] rounded text-sm text-white placeholder-[#666]"
+                />
+                <input
+                  type="number"
+                  placeholder="Max"
+                  value={filters.priceMax || ""}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, priceMax: parseInt(e.target.value) || 30000 }))}
+                  className="w-full px-2 py-1.5 bg-[#0a0a0f] border border-[#2a2a30] rounded text-sm text-white placeholder-[#666]"
+                />
               </div>
             </div>
           )}
@@ -284,15 +373,98 @@ function FilterSidebar({
 }
 
 // ============================================
-// HIGH-DENSITY PCPartPicker STYLE TABLE
+// SORT DROPDOWN
+// ============================================
+
+function SortDropdown({ value, onChange }: { value: SortOption; onChange: (value: SortOption) => void }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const options: { value: SortOption; label: string }[] = [
+    { value: "popular", label: "Most Popular" },
+    { value: "price-asc", label: "Price (Low to High)" },
+    { value: "price-desc", label: "Price (High to Low)" },
+    { value: "name-asc", label: "Name (A-Z)" },
+    { value: "name-desc", label: "Name (Z-A)" },
+    { value: "vram-desc", label: "VRAM (High to Low)" },
+    { value: "rating-desc", label: "Rating (High to Low)" },
+  ];
+
+  const selectedLabel = options.find((o) => o.value === value)?.label || "Sort";
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 px-3 py-2 bg-[#1a1a1f] border border-[#2a2a30] rounded text-sm text-white hover:border-[#00d4aa] transition-colors"
+      >
+        <ArrowUpDown className="w-4 h-4 text-[#666]" />
+        <span>{selectedLabel}</span>
+        <ChevronDown className={`w-3 h-3 text-[#666] transition-transform ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
+          <div className="absolute right-0 top-full mt-1 w-48 bg-[#1a1a1f] border border-[#2a2a30] rounded shadow-xl z-20">
+            {options.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => {
+                  onChange(option.value);
+                  setIsOpen(false);
+                }}
+                className={`w-full px-3 py-2 text-left text-sm hover:bg-[#252525] transition-colors ${
+                  value === option.value ? "text-[#00d4aa]" : "text-[#aaa]"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ============================================
+// PCPartPicker STYLE TABLE
 // ============================================
 
 function ProductTable({
   products,
+  selectedIds,
+  onToggleSelection,
+  onSelectAll,
+  allSelected,
+  sortBy,
 }: {
   products: HardwareComponent[];
+  selectedIds: Set<string>;
+  onToggleSelection: (id: string) => void;
+  onSelectAll: () => void;
+  allSelected: boolean;
+  sortBy: SortOption;
 }) {
   const router = useRouter();
+
+  // Determine active category based on products
+  const activeCategory = useMemo(() => {
+    if (products.length === 0) return null;
+    const categories = new Set(products.map((p) => p.category));
+    if (categories.size === 1) return Array.from(categories)[0];
+    return null;
+  }, [products]);
+
+  // Get columns based on active category
+  const columns = useMemo(() => {
+    switch (activeCategory) {
+      case "GPU": return GPU_COLUMNS;
+      case "CPU": return CPU_COLUMNS;
+      case "RAM": return RAM_COLUMNS;
+      default: return GENERIC_COLUMNS;
+    }
+  }, [activeCategory]);
 
   if (products.length === 0) {
     return (
@@ -303,6 +475,24 @@ function ProductTable({
     );
   }
 
+  // Generate star rating display
+  const StarRating = ({ score }: { score: number }) => {
+    const stars = Math.round(score / 20); // Convert 0-100 to 0-5 stars
+    return (
+      <div className="flex items-center justify-center gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <svg
+            key={star}
+            className={`w-3 h-3 ${star <= stars ? "text-yellow-500 fill-yellow-500" : "text-[#444]"}`}
+            viewBox="0 0 20 20"
+          >
+            <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+          </svg>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="bg-[#1a1a1f] border border-[#2a2a30] rounded-lg overflow-hidden">
       {/* Desktop Table */}
@@ -310,42 +500,30 @@ function ProductTable({
         <Table>
           <TableHeader>
             <TableRow className="border-b border-[#2a2a30] hover:bg-transparent">
-              <TableHead className="w-12 px-3 py-2 text-[11px] font-semibold text-[#888] uppercase tracking-wider">
-                
-              </TableHead>
-              <TableHead className="px-3 py-2 text-[11px] font-semibold text-[#888] uppercase tracking-wider text-left">
-                Product
-              </TableHead>
-              <TableHead className="w-24 px-3 py-2 text-[11px] font-semibold text-[#888] uppercase tracking-wider text-center">
-                Chipset
-              </TableHead>
-              <TableHead className="w-20 px-3 py-2 text-[11px] font-semibold text-[#888] uppercase tracking-wider text-center">
-                Memory
-              </TableHead>
-              <TableHead className="w-24 px-3 py-2 text-[11px] font-semibold text-[#888] uppercase tracking-wider text-center">
-                Core Clock
-              </TableHead>
-              <TableHead className="w-16 px-3 py-2 text-[11px] font-semibold text-[#888] uppercase tracking-wider text-center">
-                TDP
-              </TableHead>
-              <TableHead className="w-28 px-3 py-2 text-[11px] font-semibold text-[#888] uppercase tracking-wider text-right">
-                Price
-              </TableHead>
-              <TableHead className="w-24 px-3 py-2 text-[11px] font-semibold text-[#888] uppercase tracking-wider text-center">
-                Vendor
-              </TableHead>
-              <TableHead className="w-20 px-3 py-2 text-[11px] font-semibold text-[#888] uppercase tracking-wider text-center">
-                Action
-              </TableHead>
+              {columns.map((col) => (
+                <TableHead
+                  key={col.key}
+                  className={`${col.width} px-3 py-2 text-[11px] font-semibold text-[#888] uppercase tracking-wider ${
+                    col.align === "center" ? "text-center" : col.align === "right" ? "text-right" : "text-left"
+                  }`}
+                >
+                  {col.key === "select" ? (
+                    <Checkbox
+                      checked={allSelected}
+                      onCheckedChange={onSelectAll}
+                    />
+                  ) : (
+                    col.label
+                  )}
+                </TableHead>
+              ))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {products.map((product) => {
               const vram = extractVram(product.specs);
-              const clockSpeed = formatClockSpeed(product.specs);
-              const tdp = formatTDP(product.specs);
               const bestLink = product.directLinks?.amazon || product.affiliateLinks.amazon;
-              const aliLink = product.directLinks?.aliexpress || product.affiliateLinks.aliexpress;
+              const rating = Math.floor(Math.random() * 30) + 70; // Mock rating 70-100
 
               return (
                 <TableRow
@@ -353,57 +531,115 @@ function ProductTable({
                   className="border-b border-[#252525] hover:bg-[#252529] transition-colors cursor-pointer group"
                   onClick={() => router.push(`/product/${product.id}`)}
                 >
-                  {/* Thumbnail */}
+                  {/* Select Checkbox */}
+                  <TableCell className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={selectedIds.has(product.id)}
+                      onCheckedChange={() => onToggleSelection(product.id)}
+                    />
+                  </TableCell>
+
+                  {/* Product Name with Icon */}
                   <TableCell className="px-3 py-2">
-                    <div className="w-10 h-10 bg-[#252525] rounded flex items-center justify-center">
-                      {product.category === "GPU" ? (
-                        <Monitor className="w-5 h-5 text-[#666]" />
-                      ) : (
-                        <Cpu className="w-5 h-5 text-[#666]" />
-                      )}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-[#252525] rounded flex items-center justify-center shrink-0">
+                        {product.category === "GPU" ? (
+                          <Monitor className="w-5 h-5 text-[#666]" />
+                        ) : product.category === "CPU" ? (
+                          <Cpu className="w-5 h-5 text-[#666]" />
+                        ) : product.category === "RAM" ? (
+                          <Zap className="w-5 h-5 text-[#666]" />
+                        ) : product.category === "Storage" ? (
+                          <HardDrive className="w-5 h-5 text-[#666]" />
+                        ) : (
+                          <Monitor className="w-5 h-5 text-[#666]" />
+                        )}
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <Link
+                          href={`/product/${product.id}`}
+                          className="text-[13px] font-medium text-white group-hover:text-[#00d4aa] transition-colors truncate"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {product.name}
+                        </Link>
+                        <span className="text-[11px] text-[#666]">{product.brand}</span>
+                      </div>
                     </div>
                   </TableCell>
 
-                  {/* Product Name */}
+                  {/* Category-specific columns */}
+                  {activeCategory === "GPU" && (
+                    <>
+                      <TableCell className="px-3 py-2 text-center">
+                        <span className="text-[12px] text-[#aaa]">{product.specs.architecture || "-"}</span>
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-center">
+                        <span className="text-[12px] text-[#aaa] font-mono">{vram > 0 ? `${vram}GB` : "-"}</span>
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-center">
+                        <span className="text-[12px] text-[#aaa] font-mono">{product.specs.cuda || "-"}</span>
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-center">
+                        <span className="text-[12px] text-[#aaa] font-mono">-</span>
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-center">
+                        <span className="text-[12px] text-[#aaa] font-mono">{product.specs.tdp || "-"}</span>
+                      </TableCell>
+                    </>
+                  )}
+
+                  {activeCategory === "CPU" && (
+                    <>
+                      <TableCell className="px-3 py-2 text-center">
+                        <span className="text-[12px] text-[#aaa] font-mono">{product.specs.cores || "-"}</span>
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-center">
+                        <span className="text-[12px] text-[#aaa] font-mono">{product.specs.clock || "-"}</span>
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-center">
+                        <span className="text-[12px] text-[#aaa] font-mono">-</span>
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-center">
+                        <span className="text-[12px] text-[#aaa]">{product.specs.architecture || "-"}</span>
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-center">
+                        <span className="text-[12px] text-[#aaa] font-mono">{product.specs.tdp || "-"}</span>
+                      </TableCell>
+                    </>
+                  )}
+
+                  {activeCategory === "RAM" && (
+                    <>
+                      <TableCell className="px-3 py-2 text-center">
+                        <span className="text-[12px] text-[#aaa] font-mono">{product.specs.speed || "-"}</span>
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-center">
+                        <span className="text-[12px] text-[#aaa] font-mono">{product.specs.capacity || "-"}</span>
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-center">
+                        <span className="text-[12px] text-[#aaa] font-mono">{formatPricePerGB(product.price, extractVram(product.specs))}</span>
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-center">
+                        <span className="text-[12px] text-[#aaa]">-</span>
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-center">
+                        <span className="text-[12px] text-[#aaa] font-mono">{product.specs.architecture || "-"}</span>
+                      </TableCell>
+                    </>
+                  )}
+
+                  {(!activeCategory || (activeCategory !== "GPU" && activeCategory !== "CPU" && activeCategory !== "RAM")) && (
+                    <TableCell className="px-3 py-2 text-center">
+                      <span className="text-[12px] text-[#aaa]">
+                        {product.specs.vram || product.specs.cores || product.specs.capacity || "-"}
+                      </span>
+                    </TableCell>
+                  )}
+
+                  {/* Rating */}
                   <TableCell className="px-3 py-2">
-                    <div className="flex flex-col">
-                      <Link
-                        href={`/product/${product.id}`}
-                        className="text-[13px] font-medium text-white group-hover:text-[#00d4aa] transition-colors"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {product.name}
-                      </Link>
-                      <span className="text-[11px] text-[#666]">{product.brand}</span>
-                    </div>
-                  </TableCell>
-
-                  {/* Chipset/Architecture */}
-                  <TableCell className="px-3 py-2 text-center">
-                    <span className="text-[12px] text-[#aaa]">
-                      {product.specs.architecture || "-"}
-                    </span>
-                  </TableCell>
-
-                  {/* Memory */}
-                  <TableCell className="px-3 py-2 text-center">
-                    <span className="text-[12px] text-[#aaa] font-mono">
-                      {vram > 0 ? `${vram}GB` : "-"}
-                    </span>
-                  </TableCell>
-
-                  {/* Core Clock */}
-                  <TableCell className="px-3 py-2 text-center">
-                    <span className="text-[12px] text-[#aaa] font-mono">
-                      {clockSpeed}
-                    </span>
-                  </TableCell>
-
-                  {/* TDP */}
-                  <TableCell className="px-3 py-2 text-center">
-                    <span className="text-[12px] text-[#aaa] font-mono">
-                      {tdp}
-                    </span>
+                    <StarRating score={product.aiScore} />
                   </TableCell>
 
                   {/* Price */}
@@ -413,40 +649,13 @@ function ProductTable({
                     </span>
                   </TableCell>
 
-                  {/* Vendor Icons */}
-                  <TableCell className="px-3 py-2">
-                    <div className="flex items-center justify-center gap-2">
-                      <Link
-                        href={bestLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-[#ff9900] hover:opacity-80 transition-opacity"
-                        title="Amazon"
-                      >
-                        <AmazonLogo />
-                      </Link>
-                      <Link
-                        href={aliLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-[#ff4747] hover:opacity-80 transition-opacity"
-                        title="AliExpress"
-                      >
-                        <AliExpressLogo />
-                      </Link>
-                    </div>
-                  </TableCell>
-
-                  {/* Action Button */}
-                  <TableCell className="px-3 py-2">
+                  {/* Buy Button */}
+                  <TableCell className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
                     <Link
                       href={bestLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="flex items-center justify-center gap-1 px-2 py-1.5 bg-[#2a2a30] hover:bg-[#00d4aa] hover:text-[#0a0a0f] text-[#aaa] text-[11px] font-medium rounded transition-all"
+                      className="flex items-center justify-center gap-1 px-2 py-1.5 bg-[#ff9900] hover:bg-[#ff8800] text-white text-[11px] font-medium rounded transition-all"
                     >
                       <ShoppingCart className="w-3 h-3" />
                       Buy
@@ -474,25 +683,34 @@ function ProductTable({
                 <div className="w-12 h-12 bg-[#252525] rounded flex items-center justify-center shrink-0">
                   {product.category === "GPU" ? (
                     <Monitor className="w-6 h-6 text-[#666]" />
-                  ) : (
+                  ) : product.category === "CPU" ? (
                     <Cpu className="w-6 h-6 text-[#666]" />
+                  ) : (
+                    <HardDrive className="w-6 h-6 text-[#666]" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <Link
-                    href={`/product/${product.id}`}
-                    className="text-sm font-medium text-white hover:text-[#00d4aa] transition-colors block truncate"
-                  >
-                    {product.name}
-                  </Link>
-                  <p className="text-xs text-[#666] mb-2">{product.brand}</p>
-                  <div className="flex items-center gap-3 text-xs text-[#888]">
-                    {vram > 0 && <span className="font-mono">{vram}GB</span>}
-                    {product.specs.architecture && (
-                      <span>{product.specs.architecture}</span>
-                    )}
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <Link
+                        href={`/product/${product.id}`}
+                        className="text-sm font-medium text-white hover:text-[#00d4aa] transition-colors block truncate"
+                      >
+                        {product.name}
+                      </Link>
+                      <p className="text-xs text-[#666] mb-2">{product.brand}</p>
+                    </div>
+                    <Checkbox
+                      checked={selectedIds.has(product.id)}
+                      onCheckedChange={() => onToggleSelection(product.id)}
+                    />
                   </div>
-                  <div className="flex items-center justify-between mt-3">
+                  <div className="flex items-center gap-3 text-xs text-[#888] mb-2">
+                    {vram > 0 && <span className="font-mono">{vram}GB</span>}
+                    {product.specs.architecture && <span>{product.specs.architecture}</span>}
+                    {product.specs.cores && <span className="font-mono">{product.specs.cores} cores</span>}
+                  </div>
+                  <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-[#00d4aa] font-mono">
                       ${product.price.toLocaleString()}
                     </span>
@@ -500,10 +718,10 @@ function ProductTable({
                       href={bestLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 px-3 py-1.5 bg-[#2a2a30] text-[#aaa] text-xs rounded"
+                      className="flex items-center gap-1 px-3 py-1.5 bg-[#ff9900] text-white text-xs rounded"
                     >
                       <ExternalLink className="w-3 h-3" />
-                      View
+                      Buy
                     </Link>
                   </div>
                 </div>
@@ -517,16 +735,51 @@ function ProductTable({
 }
 
 // ============================================
-// MAIN PAGE
+// MAIN PAGE - WRAPPED IN SUSPENSE
 // ============================================
 
 export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0f0f13] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-[#00d4aa] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-[#666]">Loading...</p>
+        </div>
+      </div>
+    }>
+      <ProductsPageContent />
+    </Suspense>
+  );
+}
+
+// ============================================
+// MAIN PAGE CONTENT
+// ============================================
+
+function ProductsPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [filters, setFilters] = useState<Filters>({
-    selectedMemory: [],
-    priceRange: [PRICE_MIN, PRICE_MAX],
+    selectedCategories: [],
     selectedManufacturers: [],
+    selectedMemory: [],
+    priceMin: 0,
+    priceMax: 30000,
     searchQuery: "",
   });
+
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [sortBy, setSortBy] = useState<SortOption>("popular");
+
+  // Get active category from URL or filters
+  const activeCategory = useMemo(() => {
+    const categoryParam = searchParams.get("category") as Category | null;
+    if (categoryParam && CATEGORIES.includes(categoryParam)) return categoryParam;
+    if (filters.selectedCategories.length === 1) return filters.selectedCategories[0];
+    return null;
+  }, [searchParams, filters.selectedCategories]);
 
   // Filter logic
   const filteredProducts = useMemo(() => {
@@ -538,6 +791,11 @@ export default function ProductsPage() {
           product.name.toLowerCase().includes(query) ||
           product.brand.toLowerCase().includes(query);
         if (!matchesSearch) return false;
+      }
+
+      // Category filter
+      if (filters.selectedCategories.length > 0) {
+        if (!filters.selectedCategories.includes(product.category)) return false;
       }
 
       // Manufacturer filter
@@ -556,7 +814,7 @@ export default function ProductsPage() {
       }
 
       // Price filter
-      if (product.price < filters.priceRange[0] || product.price > filters.priceRange[1]) {
+      if (product.price < filters.priceMin || product.price > filters.priceMax) {
         return false;
       }
 
@@ -564,10 +822,61 @@ export default function ProductsPage() {
     });
   }, [filters]);
 
-  // Sort by price ascending (PCPartPicker style)
+  // Sort products
   const sortedProducts = useMemo(() => {
-    return [...filteredProducts].sort((a, b) => a.price - b.price);
-  }, [filteredProducts]);
+    const sorted = [...filteredProducts];
+    switch (sortBy) {
+      case "price-asc":
+        return sorted.sort((a, b) => a.price - b.price);
+      case "price-desc":
+        return sorted.sort((a, b) => b.price - a.price);
+      case "name-asc":
+        return sorted.sort((a, b) => a.name.localeCompare(b.name));
+      case "name-desc":
+        return sorted.sort((a, b) => b.name.localeCompare(a.name));
+      case "vram-desc":
+        return sorted.sort((a, b) => extractVram(b.specs) - extractVram(a.specs));
+      case "rating-desc":
+        return sorted.sort((a, b) => b.aiScore - a.aiScore);
+      default:
+        return sorted.sort((a, b) => b.aiScore - a.aiScore); // Most popular = highest AI score
+    }
+  }, [filteredProducts, sortBy]);
+
+  // Selection handlers
+  const toggleSelection = (id: string) => {
+    setSelectedIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAll = () => {
+    if (selectedIds.size === sortedProducts.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(sortedProducts.map((p) => p.id)));
+    }
+  };
+
+  const allSelected = sortedProducts.length > 0 && selectedIds.size === sortedProducts.length;
+
+  // Compare handler
+  const handleCompare = () => {
+    const ids = Array.from(selectedIds).slice(0, 3); // Max 3 products
+    if (ids.length >= 2) {
+      const params = new URLSearchParams();
+      ids.forEach((id, index) => {
+        params.set(`id${index + 1}`, id);
+      });
+      router.push(`/compare?${params.toString()}`);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#0f0f13]">
@@ -583,7 +892,7 @@ export default function ProductsPage() {
             </Link>
             <span className="text-[#444]">|</span>
             <h1 className="text-sm font-medium text-[#888]">
-              Hardware Database
+              {activeCategory ? `Choose ${activeCategory}` : "Choose Components"}
             </h1>
           </div>
           <div className="flex items-center gap-4">
@@ -603,25 +912,66 @@ export default function ProductsPage() {
         </div>
       </header>
 
+      {/* Compare Bar */}
+      {selectedIds.size > 0 && (
+        <div className="bg-[#1a1a1f] border-b border-[#2a2a30] px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-[#888]">
+                {selectedIds.size} selected
+              </span>
+              <button
+                onClick={() => setSelectedIds(new Set())}
+                className="text-xs text-[#666] hover:text-white transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleCompare}
+                disabled={selectedIds.size < 2}
+                className="flex items-center gap-2 px-4 py-2 bg-[#00d4aa] hover:bg-[#00b894] disabled:bg-[#2a2a30] disabled:text-[#666] text-[#0a0a0f] text-sm font-medium rounded transition-colors"
+              >
+                <Scale className="w-4 h-4" />
+                Compare Selected
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <div className="flex">
         <FilterSidebar
           filters={filters}
           setFilters={setFilters}
           resultCount={sortedProducts.length}
+          activeCategory={activeCategory}
         />
 
         <main className="flex-1 p-4 min-w-0">
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold text-white mb-1">
-              AI Hardware Components
-            </h2>
-            <p className="text-sm text-[#666]">
-              Compare GPUs, CPUs, and components for AI/ML workloads
-            </p>
+          {/* Toolbar */}
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-white">
+                {activeCategory || "All Components"}
+              </h2>
+              <p className="text-sm text-[#666]">
+                {sortedProducts.length} items
+              </p>
+            </div>
+            <SortDropdown value={sortBy} onChange={setSortBy} />
           </div>
 
-          <ProductTable products={sortedProducts} />
+          <ProductTable
+            products={sortedProducts}
+            selectedIds={selectedIds}
+            onToggleSelection={toggleSelection}
+            onSelectAll={selectAll}
+            allSelected={allSelected}
+            sortBy={sortBy}
+          />
         </main>
       </div>
     </div>
