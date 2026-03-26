@@ -1,54 +1,24 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+export const dynamic = 'force-static';
+export const revalidate = 3600;
+
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { Cpu, Loader2 } from "lucide-react";
 import {
-  MessageSquare,
-  Brain,
-  Palette,
-  ChevronRight,
-  ChevronLeft,
-  DollarSign,
-  Cpu,
-  HardDrive,
-  Zap,
-  ShoppingCart,
-  Share2,
-  ExternalLink,
-  Check,
-  Loader2,
-  Monitor,
-  Wind,
-  CircuitBoard,
-  MemoryStick,
-} from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
-import {
-  recommendBuild,
-  useCases,
-  type UseCase,
-  type RecommendedBuild,
-  encodeBuildToURL,
-  decodeURLToBuild,
-  generateAffiliateLinksForBuild,
-  type AffiliateLinkGroup,
-} from "@/lib/build-logic";
-import { type HardwareComponent } from "@/data/components";
-
-// ============================================
-// Step Definitions
-// ============================================
-
-type Step = 1 | 2 | 3 | 4;
-
-interface WizardState {
-  step: Step;
-  budget: number;
-  useCase: UseCase | null;
-  brandPreference: "nvidia-only" | "no-preference";
-}
+  updateBuilderState,
+  decodeBuilderUrl,
+  type BuilderState,
+  type BuilderAction,
+} from "@/lib/builder-actions";
+import StepPlan from "@/components/builder/StepPlan";
+import StepCategory from "@/components/builder/StepCategory";
+import StepOS from "@/components/builder/StepOS";
+import StepBuild from "@/components/builder/StepBuild";
+import InteractiveStepper from "@/components/builder/InteractiveStepper";
+import Navbar from "@/components/Navbar";
 
 // ============================================
 // Animation Variants
@@ -56,7 +26,7 @@ interface WizardState {
 
 const slideVariants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? 300 : -300,
+    x: direction > 0 ? 100 : -100,
     opacity: 0,
   }),
   center: {
@@ -64,881 +34,307 @@ const slideVariants = {
     opacity: 1,
   },
   exit: (direction: number) => ({
-    x: direction < 0 ? 300 : -300,
+    x: direction < 0 ? 100 : -100,
     opacity: 0,
   }),
 };
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
+// ============================================
+// Initial State
+// ============================================
+
+const initialState: BuilderState = {
+  step: 1,
+  plan: null,
+  category: null,
+  os: null,
+  recommendedGPU: null,
+  totalPrice: 0,
+  shareableUrl: "",
 };
 
-// ============================================
-// Component Icons
-// ============================================
-
-const componentIcons: Record<string, React.ElementType> = {
-  GPU: Monitor,
-  CPU: Cpu,
-  Motherboard: CircuitBoard,
-  RAM: MemoryStick,
-  Storage: HardDrive,
-  PSU: Zap,
-  Cooling: Wind,
-};
+const steps = [
+  { id: 1, label: "Plan" },
+  { id: 2, label: "Task" },
+  { id: 3, label: "OS" },
+  { id: 4, label: "Build" },
+];
 
 // ============================================
-// Use Case Card Component
+// Loading Component
 // ============================================
 
-function UseCaseCard({
-  useCase,
-  isSelected,
-  onClick,
-}: {
-  useCase: (typeof useCases)[0];
-  isSelected: boolean;
-  onClick: () => void;
-}) {
-  const Icon =
-    useCase.icon === "MessageSquare"
-      ? MessageSquare
-      : useCase.icon === "Brain"
-      ? Brain
-      : Palette;
-
+function BuilderLoading() {
   return (
-    <button
-      onClick={onClick}
-      className={`relative group w-full text-left p-6 rounded-xl border transition-all duration-300 ${
-        isSelected
-          ? "bg-emerald-500/10 border-emerald-500/50"
-          : "bg-slate-900/50 border-slate-800 hover:border-slate-700"
-      }`}
-    >
-      {/* Glow effect */}
-      <div
-        className={`absolute -inset-0.5 rounded-xl blur transition-all duration-300 ${
-          isSelected ? "bg-emerald-500/20 opacity-100" : "opacity-0"
-        }`}
-      />
-
-      <div className="relative">
-        <div
-          className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-colors ${
-            isSelected
-              ? "bg-emerald-500/20 text-emerald-400"
-              : "bg-slate-800 text-slate-400"
-          }`}
-        >
-          <Icon className="w-6 h-6" />
-        </div>
-
-        <h3 className="text-lg font-semibold text-white mb-2">
-          {useCase.name}
-        </h3>
-        <p className="text-sm text-slate-400 mb-4">{useCase.description}</p>
-
-        <div className="flex flex-wrap gap-2 text-xs">
-          <span className="px-2 py-1 rounded bg-slate-800 text-slate-300">
-            Min {useCase.minVram}GB VRAM
-          </span>
-          <span className="px-2 py-1 rounded bg-slate-800 text-slate-300">
-            ${useCase.minBudget.toLocaleString()}+
-          </span>
-        </div>
-      </div>
-
-      {isSelected && (
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="absolute top-4 right-4 w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center"
-        >
-          <Check className="w-4 h-4 text-white" />
-        </motion.div>
-      )}
-    </button>
-  );
-}
-
-// ============================================
-// Budget Slider Component
-// ============================================
-
-function BudgetSlider({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (value: number) => void;
-}) {
-  const presets = [800, 1200, 2000, 3500, 5000, 8000];
-
-  return (
-    <div className="space-y-6">
-      {/* Budget Display */}
+    <div className="min-h-screen bg-[#050505] flex items-center justify-center">
       <div className="text-center">
-        <div className="text-4xl font-bold text-emerald-400 mb-1">
-          ${value.toLocaleString()}
-        </div>
-        <div className="text-sm text-slate-400">Total Build Budget</div>
-      </div>
-
-      {/* Slider */}
-      <div className="relative">
-        <input
-          type="range"
-          min="800"
-          max="10000"
-          step="100"
-          value={value}
-          onChange={(e) => onChange(parseInt(e.target.value))}
-          className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-        />
-        <div className="flex justify-between text-xs text-slate-500 mt-2">
-          <span>$800</span>
-          <span>$10,000+</span>
-        </div>
-      </div>
-
-      {/* Presets */}
-      <div className="flex flex-wrap gap-2 justify-center">
-        {presets.map((preset) => (
-          <button
-            key={preset}
-            onClick={() => onChange(preset)}
-            className={`px-4 py-2 text-sm rounded-lg border transition-all ${
-              value === preset
-                ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400"
-                : "bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700"
-            }`}
-          >
-            ${preset.toLocaleString()}
-          </button>
-        ))}
+        <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mx-auto mb-4" />
+        <p className="text-zinc-400">Loading AI Forge Builder...</p>
       </div>
     </div>
   );
 }
 
 // ============================================
-// Brand Preference Component
+// Main Builder Wizard
 // ============================================
-
-function BrandPreferenceCard({
-  preference,
-  isSelected,
-  onClick,
-}: {
-  preference: {
-    id: "nvidia-only" | "no-preference";
-    name: string;
-    description: string;
-  };
-  isSelected: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`relative group w-full text-left p-6 rounded-xl border transition-all duration-300 ${
-        isSelected
-          ? "bg-emerald-500/10 border-emerald-500/50"
-          : "bg-slate-900/50 border-slate-800 hover:border-slate-700"
-      }`}
-    >
-      <div
-        className={`absolute -inset-0.5 rounded-xl blur transition-all duration-300 ${
-          isSelected ? "bg-emerald-500/20 opacity-100" : "opacity-0"
-        }`}
-      />
-
-      <div className="relative">
-        <h3 className="text-lg font-semibold text-white mb-2">
-          {preference.name}
-        </h3>
-        <p className="text-sm text-slate-400">{preference.description}</p>
-      </div>
-
-      {isSelected && (
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="absolute top-4 right-4 w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center"
-        >
-          <Check className="w-4 h-4 text-white" />
-        </motion.div>
-      )}
-    </button>
-  );
-}
-
-// ============================================
-// Component Card in Build Preview
-// ============================================
-
-function BuildComponentCard({
-  component,
-  index,
-}: {
-  component: HardwareComponent;
-  index: number;
-}) {
-  const Icon = componentIcons[component.category] || Monitor;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      className="group relative bg-slate-900/60 backdrop-blur-sm border border-white/10 rounded-lg p-4 hover:border-emerald-500/30 transition-all"
-    >
-      <div className="flex items-start gap-4">
-        <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center shrink-0">
-          <Icon className="w-5 h-5 text-slate-400" />
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs text-slate-500 uppercase">
-              {component.category}
-            </span>
-            <span className="text-xs text-emerald-400">
-              AI Score: {component.aiScore}
-            </span>
-          </div>
-
-          <h4 className="text-sm font-semibold text-white truncate mb-1">
-            {component.name}
-          </h4>
-
-          <p className="text-xs text-slate-400 line-clamp-1 mb-2">
-            {component.description}
-          </p>
-
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-bold text-emerald-400">
-              ${component.price.toLocaleString()}
-            </span>
-
-            <Link
-              href={component.affiliateLinks.amazon}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-slate-400 hover:text-white flex items-center gap-1 transition-colors"
-            >
-              Buy
-              <ExternalLink className="w-3 h-3" />
-            </Link>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-// ============================================
-// Build Score Card
-// ============================================
-
-function BuildScoreCard({
-  build,
-  isCalculating,
-}: {
-  build: RecommendedBuild | null;
-  isCalculating: boolean;
-}) {
-  if (isCalculating) {
-    return (
-      <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-xl p-8 text-center">
-        <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mx-auto mb-4" />
-        <p className="text-slate-400">Calculating optimal build...</p>
-      </div>
-    );
-  }
-
-  if (!build) {
-    return (
-      <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-xl p-8">
-        <div className="text-center">
-          <Cpu className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">
-            Ready to Build
-          </h3>
-          <p className="text-sm text-slate-400">
-            Complete the wizard steps to generate your custom AI workstation recommendation.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden"
-    >
-      {/* Header */}
-      <div className="p-6 border-b border-white/10">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white">Your AI Build</h2>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-400">AI Score</span>
-            <span className="text-2xl font-bold text-emerald-400">
-              {build.aiScore}
-            </span>
-          </div>
-        </div>
-
-        {/* Stats Row */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="text-center p-3 bg-slate-800/50 rounded-lg">
-            <div className="text-lg font-bold text-white">
-              {build.totalVram}GB
-            </div>
-            <div className="text-xs text-slate-400">Total VRAM</div>
-          </div>
-          <div className="text-center p-3 bg-slate-800/50 rounded-lg">
-            <div className="text-lg font-bold text-white">
-              {build.estimatedWattage}W
-            </div>
-            <div className="text-xs text-slate-400">Est. Power</div>
-          </div>
-          <div className="text-center p-3 bg-slate-800/50 rounded-lg">
-            <div className="text-lg font-bold text-emerald-400">
-              ${build.totalPrice.toLocaleString()}
-            </div>
-            <div className="text-xs text-slate-400">Total Price</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Components List */}
-      <div className="p-6 space-y-3 max-h-[400px] overflow-y-auto">
-        <BuildComponentCard component={build.gpu} index={0} />
-        <BuildComponentCard component={build.cpu} index={1} />
-        <BuildComponentCard component={build.motherboard} index={2} />
-        <BuildComponentCard component={build.ram} index={3} />
-        <BuildComponentCard component={build.storage} index={4} />
-        <BuildComponentCard component={build.psu} index={5} />
-        <BuildComponentCard component={build.cooling} index={6} />
-      </div>
-
-      {/* Reasoning */}
-      <div className="px-6 pb-6">
-        <div className="p-4 bg-slate-800/50 rounded-lg">
-          <h4 className="text-sm font-semibold text-white mb-2">
-            Why this build?
-          </h4>
-          <ul className="space-y-1">
-            {build.reasoning.map((reason, i) => (
-              <li key={i} className="text-xs text-slate-400 flex items-start gap-2">
-                <span className="text-emerald-400 mt-0.5">•</span>
-                {reason}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-// ============================================
-// Affiliate Modal
-// ============================================
-
-function AffiliateModal({
-  build,
-  isOpen,
-  onClose,
-}: {
-  build: RecommendedBuild | null;
-  isOpen: boolean;
-  onClose: () => void;
-}) {
-  const [selectedStore, setSelectedStore] = useState<"Amazon" | "eBay" | "AliExpress">("Amazon");
-
-  if (!isOpen || !build) return null;
-
-  const affiliateGroups = generateAffiliateLinksForBuild(build);
-  const selectedGroup = affiliateGroups.find((g) => g.store === selectedStore);
-
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
-            onClick={onClose}
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg bg-slate-900 border border-white/10 rounded-xl z-50 overflow-hidden"
-          >
-            <div className="p-6 border-b border-white/10">
-              <h3 className="text-xl font-bold text-white">Add All to Cart</h3>
-              <p className="text-sm text-slate-400 mt-1">
-                Select a store to add all components
-              </p>
-            </div>
-
-            {/* Store Tabs */}
-            <div className="flex border-b border-white/10">
-              {(["Amazon", "eBay", "AliExpress"] as const).map((store) => (
-                <button
-                  key={store}
-                  onClick={() => setSelectedStore(store)}
-                  className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                    selectedStore === store
-                      ? "text-emerald-400 border-b-2 border-emerald-400"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  {store}
-                </button>
-              ))}
-            </div>
-
-            {/* Links List */}
-            <div className="p-4 max-h-[300px] overflow-y-auto space-y-2">
-              {selectedGroup?.links.map((link, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg"
-                >
-                  <span className="text-sm text-slate-300 truncate flex-1 mr-4">
-                    {link.name}
-                  </span>
-                  <Link
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
-                  >
-                    ${link.price.toLocaleString()}
-                    <ExternalLink className="w-3 h-3" />
-                  </Link>
-                </div>
-              ))}
-            </div>
-
-            {/* Total */}
-            <div className="p-4 border-t border-white/10 bg-slate-800/30">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-slate-400">Total at {selectedStore}</span>
-                <span className="text-xl font-bold text-emerald-400">
-                  ${selectedGroup?.totalPrice.toLocaleString()}
-                </span>
-              </div>
-
-              <button
-                onClick={onClose}
-                className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  );
-}
-
-// ============================================
-// Main Builder Page
-// ============================================
-
-export default function BuilderPageWrapper() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center transition-colors duration-500">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mx-auto mb-4" />
-          <p className="text-[var(--text-secondary)]">Loading configurator...</p>
-        </div>
-      </div>
-    }>
-      <BuilderWizard />
-    </Suspense>
-  );
-}
 
 function BuilderWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  const [state, setState] = useState<WizardState>({
-    step: 1,
-    budget: 2000,
-    useCase: null,
-    brandPreference: "no-preference",
-  });
-
+  const [state, setState] = useState<BuilderState>(initialState);
   const [direction, setDirection] = useState(1);
-  const [build, setBuild] = useState<RecommendedBuild | null>(null);
-  const [isCalculating, setIsCalculating] = useState(false);
-  const [showAffiliateModal, setShowAffiliateModal] = useState(false);
-  const [showShareToast, setShowShareToast] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load from URL on mount
   useEffect(() => {
-    const params = Object.fromEntries(searchParams.entries());
-    const decoded = decodeURLToBuild(params);
-    if (decoded) {
-      setState({
-        step: 4,
-        budget: decoded.budget,
-        useCase: decoded.useCase,
-        brandPreference: decoded.brandPreference,
-      });
-    }
+    const loadFromUrl = async () => {
+      const params = Object.fromEntries(searchParams.entries());
+      const decoded = await decodeBuilderUrl(params);
+      
+      if (decoded) {
+        setState((prev) => ({
+          ...prev,
+          ...decoded,
+        }));
+      }
+      
+      setIsLoading(false);
+    };
+
+    loadFromUrl();
   }, [searchParams]);
 
-  // Calculate build when reaching step 4
+  // Update URL when state changes (only for completed builds)
   useEffect(() => {
-    if (state.step === 4 && state.useCase) {
-      setIsCalculating(true);
-      const useCase = state.useCase;
-      // Simulate calculation delay for UX
-      setTimeout(() => {
-        const recommended = recommendBuild({
-          budget: state.budget,
-          useCase: useCase,
-          brandPreference: state.brandPreference,
-        });
-        setBuild(recommended);
-        setIsCalculating(false);
-      }, 800);
+    if (state.step === 4 && state.shareableUrl) {
+      router.replace(`/builder${state.shareableUrl}`, { scroll: false });
     }
-  }, [state.step, state.budget, state.useCase, state.brandPreference]);
+  }, [state.step, state.shareableUrl, router]);
 
-  const nextStep = () => {
-    if (state.step < 4) {
-      setDirection(1);
-      setState((s) => ({ ...s, step: (s.step + 1) as Step }));
+  // Handle state updates via Server Actions
+  const dispatch = async (action: BuilderAction) => {
+    setDirection(action.type === "RESET" || action.type === "SET_PLAN" ? -1 : 1);
+    
+    if (action.type === "RESET") {
+      setState(initialState);
+      router.replace("/builder", { scroll: false });
+      return;
     }
+
+    const newState = await updateBuilderState(state, action);
+    setState(newState);
   };
 
-  const prevStep = () => {
+  // Step handlers
+  const handlePlanSelect = (planId: string) => {
+    dispatch({ type: "SET_PLAN", payload: planId });
+  };
+
+  const handleCategorySelect = (categoryId: string) => {
+    dispatch({ type: "SET_CATEGORY", payload: categoryId });
+  };
+
+  const handleOSSelect = (osId: string) => {
+    dispatch({ type: "SET_OS", payload: osId });
+  };
+
+  const handleBack = () => {
     if (state.step > 1) {
       setDirection(-1);
-      setState((s) => ({ ...s, step: (s.step - 1) as Step }));
+      setState((prev) => ({ ...prev, step: prev.step - 1 }));
     }
   };
 
-  const handleShare = useCallback(() => {
-    if (!state.useCase) return;
+  const handleReset = () => {
+    dispatch({ type: "RESET" });
+  };
 
-    const params = encodeBuildToURL({
-      budget: state.budget,
-      useCase: state.useCase,
-      brandPreference: state.brandPreference,
-    });
-
-    const url = `${window.location.origin}/builder${params}`;
-    navigator.clipboard.writeText(url);
-    setShowShareToast(true);
-    setTimeout(() => setShowShareToast(false), 3000);
-  }, [state]);
-
-  const brandPreferences = [
-    {
-      id: "nvidia-only" as const,
-      name: "NVIDIA Only",
-      description: "Best for training and maximum compatibility with CUDA",
-    },
-    {
-      id: "no-preference" as const,
-      name: "No Preference",
-      description: "Consider all options including AMD for better value",
-    },
-  ];
+  if (isLoading) {
+    return <BuilderLoading />;
+  }
 
   return (
-    <main className="min-h-screen bg-[var(--background)] transition-colors duration-500">
-      {/* Header */}
-      <div className="border-b border-[var(--card-border)]">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-              <Cpu className="w-5 h-5 text-emerald-500" />
+    <div className="min-h-screen bg-[#050505]">
+      <Navbar />
+
+      {/* Header Section */}
+      <div className="relative border-b border-white/5">
+        {/* Background Glow */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse at 50% 0%, rgba(16, 185, 129, 0.1) 0%, transparent 60%)",
+          }}
+        />
+
+        <div className="relative max-w-[1400px] mx-auto px-6 py-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="icon-geometric">
+                <Cpu className="w-5 h-5" />
+              </div>
+              <span className="label-mono">Interactive Wizard</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)]">
-              AI Workstation Configurator
+            <h1 className="headline-hero text-4xl md:text-5xl lg:text-6xl mb-4">
+              AI Forge Builder
             </h1>
-          </div>
-          <p className="text-[var(--text-secondary)] max-w-2xl">
-            Answer a few questions and we&apos;ll recommend the optimal hardware configuration for your AI workloads.
-          </p>
+            <p className="body-premium text-lg max-w-2xl">
+              Configure your optimal AI workstation through our guided wizard. 
+              Select your tier, task, and OS to receive tailored hardware recommendations.
+            </p>
+          </motion.div>
         </div>
       </div>
 
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+      {/* Builder Container */}
+      <div className="max-w-[1400px] mx-auto px-6 py-12">
+        <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Wizard */}
-          <div>
-            {/* Progress Steps */}
-            <div className="flex items-center gap-2 mb-8">
-              {[1, 2, 3, 4].map((step, i) => (
-                <div key={step} className="flex items-center gap-2">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
-                      state.step >= step
-                        ? "bg-emerald-500 text-white"
-                        : "bg-slate-800 text-slate-400"
-                    }`}
-                  >
-                    {state.step > step ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      step
-                    )}
-                  </div>
-                  {i < 3 && (
-                    <div
-                      className={`w-12 h-0.5 transition-colors ${
-                        state.step > step ? "bg-emerald-500" : "bg-slate-800"
-                      }`}
+          <div className="lg:col-span-2">
+            {/* Glassmorphism Container */}
+            <div
+              className="relative rounded-2xl p-8 md:p-10"
+              style={{
+                background: "rgba(255, 255, 255, 0.01)",
+                backdropFilter: "blur(24px)",
+                WebkitBackdropFilter: "blur(24px)",
+                border: "1px solid rgba(255, 255, 255, 0.05)",
+              }}
+            >
+              {/* Stepper */}
+              <InteractiveStepper currentStep={state.step} steps={steps} />
+
+              {/* Step Content with Sliding Animation */}
+              <AnimatePresence mode="wait" custom={direction}>
+                <motion.div
+                  key={state.step}
+                  custom={direction}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+                >
+                  {state.step === 1 && (
+                    <StepPlan
+                      selectedPlan={state.plan}
+                      onSelect={handlePlanSelect}
                     />
                   )}
-                </div>
-              ))}
-            </div>
 
-            {/* Step Content */}
-            <AnimatePresence mode="wait" custom={direction}>
-              <motion.div
-                key={state.step}
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              >
-                {/* Step 1: Budget */}
-                {state.step === 1 && (
-                  <div className="space-y-6">
-                    <div>
-                      <h2 className="text-xl font-semibold text-white mb-2">
-                        What&apos;s your budget?
-                      </h2>
-                      <p className="text-slate-400">
-                        Set your total build budget. We&apos;ll optimize the component
-                        selection to maximize AI performance within your limit.
-                      </p>
-                    </div>
-
-                    <BudgetSlider
-                      value={state.budget}
-                      onChange={(budget) => setState((s) => ({ ...s, budget }))}
+                  {state.step === 2 && (
+                    <StepCategory
+                      selectedCategory={state.category}
+                      selectedPlan={state.plan}
+                      onSelect={handleCategorySelect}
+                      onBack={handleBack}
                     />
+                  )}
 
-                    <div className="flex gap-3">
-                      <button
-                        onClick={nextStep}
-                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium transition-colors"
-                      >
-                        Continue
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
+                  {state.step === 3 && (
+                    <StepOS
+                      selectedOS={state.os}
+                      onSelect={handleOSSelect}
+                      onBack={handleBack}
+                    />
+                  )}
 
-                {/* Step 2: Use Case */}
-                {state.step === 2 && (
-                  <div className="space-y-6">
-                    <div>
-                      <h2 className="text-xl font-semibold text-white mb-2">
-                        What will you use it for?
-                      </h2>
-                      <p className="text-slate-400">
-                        Select your primary use case. This determines the optimal
-                        balance between VRAM, compute power, and price.
-                      </p>
-                    </div>
-
-                    <div className="grid gap-4">
-                      {useCases.map((useCase) => (
-                        <UseCaseCard
-                          key={useCase.id}
-                          useCase={useCase}
-                          isSelected={state.useCase === useCase.id}
-                          onClick={() =>
-                            setState((s) => ({ ...s, useCase: useCase.id }))
-                          }
-                        />
-                      ))}
-                    </div>
-
-                    <div className="flex gap-3">
-                      <button
-                        onClick={prevStep}
-                        className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-medium transition-colors"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={nextStep}
-                        disabled={!state.useCase}
-                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-lg font-medium transition-colors"
-                      >
-                        Continue
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 3: Brand Preference */}
-                {state.step === 3 && (
-                  <div className="space-y-6">
-                    <div>
-                      <h2 className="text-xl font-semibold text-white mb-2">
-                        Brand preference?
-                      </h2>
-                      <p className="text-slate-400">
-                        Choose your GPU brand preference. NVIDIA offers the best
-                        software support, while AMD can provide better value.
-                      </p>
-                    </div>
-
-                    <div className="grid gap-4">
-                      {brandPreferences.map((pref) => (
-                        <BrandPreferenceCard
-                          key={pref.id}
-                          preference={pref}
-                          isSelected={state.brandPreference === pref.id}
-                          onClick={() =>
-                            setState((s) => ({
-                              ...s,
-                              brandPreference: pref.id,
-                            }))
-                          }
-                        />
-                      ))}
-                    </div>
-
-                    <div className="flex gap-3">
-                      <button
-                        onClick={prevStep}
-                        className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-medium transition-colors"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={nextStep}
-                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium transition-colors"
-                      >
-                        Generate Build
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 4: Results */}
-                {state.step === 4 && (
-                  <div className="space-y-6">
-                    <div>
-                      <h2 className="text-xl font-semibold text-white mb-2">
-                        Your Recommended Build
-                      </h2>
-                      <p className="text-slate-400">
-                        Based on your preferences, here&apos;s the optimal configuration
-                        for maximum AI performance.
-                      </p>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        onClick={() => setShowAffiliateModal(true)}
-                        disabled={isCalculating}
-                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 text-white rounded-lg font-medium transition-colors"
-                      >
-                        <ShoppingCart className="w-4 h-4" />
-                        Add All to Cart
-                      </button>
-                      <button
-                        onClick={handleShare}
-                        disabled={isCalculating}
-                        className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
-                      >
-                        <Share2 className="w-4 h-4" />
-                        Share Build
-                      </button>
-                      <button
-                        onClick={() => {
-                          setState({
-                            step: 1,
-                            budget: 2000,
-                            useCase: null,
-                            brandPreference: "no-preference",
-                          });
-                          setBuild(null);
-                        }}
-                        className="flex items-center gap-2 px-4 py-2 border border-slate-700 hover:border-slate-600 text-slate-300 rounded-lg font-medium transition-colors"
-                      >
-                        Start Over
-                      </button>
-                    </div>
-
-                    {/* Share Toast */}
-                    <AnimatePresence>
-                      {showShareToast && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg"
-                        >
-                          <p className="text-sm text-emerald-400">
-                            Build URL copied to clipboard!
-                          </p>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-
-                    <div className="flex gap-3">
-                      <button
-                        onClick={prevStep}
-                        className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-medium transition-colors"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </motion.div>
-            </AnimatePresence>
+                  {state.step === 4 && (
+                    <StepBuild
+                      plan={state.plan}
+                      category={state.category}
+                      os={state.os}
+                      recommendedGPU={state.recommendedGPU}
+                      totalPrice={state.totalPrice}
+                      shareableUrl={state.shareableUrl}
+                      onReset={handleReset}
+                    />
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
 
-          {/* Right Column - Live Preview */}
-          <div className="lg:sticky lg:top-8 lg:self-start">
-            <BuildScoreCard build={build} isCalculating={isCalculating} />
+          {/* Right Column - Info Panel */}
+          <div className="hidden lg:block">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="sticky top-8 space-y-6"
+            >
+              {/* Current Selection Card */}
+              <div className="glass-premium p-6">
+                <h3 className="label-mono mb-4">Current Configuration</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-2 border-b border-white/5">
+                    <span className="text-sm text-zinc-500">Tier</span>
+                    <span className={`text-sm font-medium ${state.plan ? "text-emerald-400" : "text-zinc-600"}`}>
+                      {state.plan || "Not selected"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-white/5">
+                    <span className="text-sm text-zinc-500">Task</span>
+                    <span className={`text-sm font-medium ${state.category ? "text-emerald-400" : "text-zinc-600"}`}>
+                      {state.category || "Not selected"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-white/5">
+                    <span className="text-sm text-zinc-500">OS</span>
+                    <span className={`text-sm font-medium ${state.os ? "text-emerald-400" : "text-zinc-600"}`}>
+                      {state.os || "Not selected"}
+                    </span>
+                  </div>
+                  {state.recommendedGPU && (
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-sm text-zinc-500">GPU</span>
+                      <span className="text-sm font-medium text-emerald-400 truncate max-w-[150px]">
+                        {state.recommendedGPU.name}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Tips Card */}
+              <div className="glass-premium p-6">
+                <h3 className="label-mono mb-4">Builder Tips</h3>
+                <ul className="space-y-3 text-sm text-zinc-400">
+                  <li className="flex items-start gap-2">
+                    <span className="text-emerald-400 mt-0.5">•</span>
+                    Higher VRAM enables larger models
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-emerald-400 mt-0.5">•</span>
+                    NVIDIA GPUs offer best CUDA support
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-emerald-400 mt-0.5">•</span>
+                    Linux provides optimal AI performance
+                  </li>
+                </ul>
+              </div>
+            </motion.div>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* Affiliate Modal */}
-      <AffiliateModal
-        build={build}
-        isOpen={showAffiliateModal}
-        onClose={() => setShowAffiliateModal(false)}
-      />
-    </main>
+// ============================================
+// Page Export with Suspense
+// ============================================
+
+export default function BuilderPage() {
+  return (
+    <Suspense fallback={<BuilderLoading />}>
+      <BuilderWizard />
+    </Suspense>
   );
 }

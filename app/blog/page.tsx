@@ -16,6 +16,21 @@ export const metadata = {
     description:
       "In-depth analysis, benchmarks, and guides for AI hardware. Expert insights on GPUs, CPUs, and building the ultimate AI workstation.",
     type: "website",
+    images: [
+      {
+        url: "/api/og",
+        width: 1200,
+        height: 630,
+        alt: "The AI Forge - Hardware Intelligence",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Guides & Research | The AI Forge",
+    description:
+      "In-depth analysis, benchmarks, and guides for AI hardware.",
+    images: ["/api/og"],
   },
 };
 

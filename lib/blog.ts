@@ -16,6 +16,8 @@ export interface BlogPost {
   tags: string[]
   featuredHardware: string[]
   content: string
+  author?: string
+  updatedAt?: string
 }
 
 export function getAllBlogPosts(): BlogPost[] {
@@ -43,6 +45,8 @@ export function getAllBlogPosts(): BlogPost[] {
         tags: matterResult.data.tags || [],
         featuredHardware: matterResult.data.featuredHardware || [],
         content: matterResult.content,
+        author: matterResult.data.author,
+        updatedAt: matterResult.data.updatedAt,
       }
     })
 
@@ -66,6 +70,8 @@ export function getBlogPostBySlug(slug: string): BlogPost | null {
       tags: matterResult.data.tags || [],
       featuredHardware: matterResult.data.featuredHardware || [],
       content: matterResult.content,
+      author: matterResult.data.author,
+      updatedAt: matterResult.data.updatedAt,
     }
   } catch {
     return null

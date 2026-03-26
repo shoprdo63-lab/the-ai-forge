@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "analyze": "cross-env ANALYZE=true next build",
+    "analyze:server": "cross-env ANALYZE=true BUNDLE_ANALYZER_BROWSER=false next build",
+    "analyze:client": "cross-env ANALYZE=true BUNDLE_ANALYZER_BROWSER=true next build",
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf .next dist"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.3",
@@ -35,13 +40,17 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.2.1",
     "@tailwindcss/postcss": "^4",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^7.0.3",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "ignore-loader": "^0.1.2",
+    "rimraf": "^5.0.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

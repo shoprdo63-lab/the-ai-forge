@@ -1,15 +1,28 @@
 export interface ProductSpecs {
   // GPU fields
   vram?: string;
-  vramType?: "GDDR6" | "GDDR6X" | "HBM3" | "HBM2e";
-  chipset?: string; // RTX 50-series, 40-series, etc.
+  vramType?: "GDDR6" | "GDDR6X" | "HBM3" | "HBM2e" | "HBM3e";
+  chipset?: string;
   cuda?: string;
   tensor?: string;
+  
+  // Enterprise GPU fields (H100, H200, B200, A100)
+  hbmCapacity?: string; // HBM3e capacity for Enterprise GPUs
+  nvlinkVersion?: string; // NVLink 4.0, 3.0, etc.
+  nvlinkBandwidth?: string; // NVLink bandwidth
+  fp8Performance?: string; // FP8 Tensor Core performance
+  fp16Performance?: string; // FP16 Tensor Core performance
+  bf16Performance?: string; // BF16 performance
+  tf32Performance?: string; // TF32 performance
+  int8Performance?: string; // INT8 performance
+  transformerEngine?: boolean; // Transformer Engine support
+  multiInstanceGPU?: boolean; // MIG support
+  maxThermalDesign?: string; // Maximum thermal design power
   
   // CPU fields
   cores?: string;
   threads?: string;
-  socket?: string; // LGA1700, AM5, etc.
+  socket?: string;
   boostClock?: string;
   
   // Motherboard fields

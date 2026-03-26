@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import SmoothScroll from "@/components/SmoothScroll";
+import SpectralGlow from "@/components/SpectralGlow";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,9 +57,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col pb-0 md:pb-0 pb-[calc(80px+env(safe-area-inset-bottom))]">
+      <body className="relative min-h-full flex flex-col pb-0 md:pb-0 pb-[calc(80px+env(safe-area-inset-bottom))]">
+        <SpectralGlow />
         <ThemeProvider>
-          {children}
+          <SmoothScroll>
+            {children}
+          </SmoothScroll>
           <MobileBottomNav />
         </ThemeProvider>
       </body>
