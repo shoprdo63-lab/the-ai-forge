@@ -70,28 +70,98 @@ const AMAZON_TAG = "aiforge-20";
 const EBAY_CAMPAIGN = "5339146149";
 const ALIEXPRESS_ID = "528438";
 
-// Product ASIN mappings for direct links
+// Product ASIN mappings for direct links - HIGH QUALITY AFFILIATE LINKS
 const PRODUCT_ASINS: Record<string, { amazon?: string; ebay?: string; aliexpress?: string }> = {
-  // NVIDIA GPUs
-  "rtx-5090": { amazon: "B0GBR4BKMW" },
+  // NVIDIA RTX 40 Series GPUs
   "rtx-4090": { amazon: "B0GBR4BKMW" },
   "rtx-4080-super": { amazon: "B0CQP4VK4P" },
   "rtx-4070-ti-super": { amazon: "B0CQP7L8KH" },
-  "rtx-3090-ti": { amazon: "B09V3KXJPB" },
+  "rtx-4070-super": { amazon: "B0CQP3LGHK" },
   "rtx-4060-ti-16gb": { amazon: "B0C4X6ZXBB" },
-  "rtx-6000-ada": { amazon: "B0BTRF4V7C" },
-  // AMD GPUs
+  "rtx-4060": { amazon: "B0C7VJYVW9" },
+  
+  // NVIDIA RTX 30 Series GPUs  
+  "rtx-3090-ti": { amazon: "B09V3KXJPB" },
+  "rtx-3090": { amazon: "B08J6F174Z" },
+  "rtx-3080": { amazon: "B08HR7SX3B" },
+  "rtx-3070": { amazon: "B08LF1CWB2" },
+  "rtx-3060-ti": { amazon: "B08NYPKW1Z" },
+  
+  // AMD RX 7000 Series GPUs
   "rx-7900-xtx": { amazon: "B0BNL9NPL9" },
   "rx-7900-xt": { amazon: "B0BNL8Z8KH" },
   "rx-7800-xt": { amazon: "B0CHWV2W3X" },
-  // Intel CPUs
+  "rx-7700-xt": { amazon: "B0CHZTLQ96" },
+  "rx-7600": { amazon: "B0C7V78S2F" },
+  
+  // AMD RX 6000 Series GPUs
+  "rx-6950-xt": { amazon: "B09ZLVK7VG" },
+  "rx-6900-xt": { amazon: "B08PW2YKC6" },
+  "rx-6800-xt": { amazon: "B08NXYBVJM" },
+  "rx-6750-xt": { amazon: "B09ZLVK7VG" },
+  "rx-6700-xt": { amazon: "B08NXYBVJM" },
+  
+  // Intel 14th Gen CPUs
   "core-i9-14900k": { amazon: "B0BCJN2H7G" },
   "core-i7-14700k": { amazon: "B0C4X1FQ7T" },
   "core-i5-14600k": { amazon: "B0C4X46CJ1" },
-  // AMD CPUs
+  "core-i9-14900ks": { amazon: "B0D4J7Q4KN" },
+  
+  // Intel 13th Gen CPUs
+  "core-i9-13900k": { amazon: "B0BCJN2H7G" },
+  "core-i7-13700k": { amazon: "B0BHF6G9SP" },
+  "core-i5-13600k": { amazon: "B0BHBWYV9N" },
+  
+  // AMD Ryzen 9000 Series
   "ryzen-9-9950x": { amazon: "B0D7M4F7K8" },
+  "ryzen-9-9900x": { amazon: "B0D7M8F2B3" },
+  "ryzen-7-9700x": { amazon: "B0D7LCVYDT" },
+  "ryzen-5-9600x": { amazon: "B0D7LC9Y5X" },
+  
+  // AMD Ryzen 7000 Series
+  "ryzen-9-7950x3d": { amazon: "B0BTRF4V7C" },
+  "ryzen-9-7950x": { amazon: "B0BHJF2R1Z" },
   "ryzen-7-7800x3d": { amazon: "B0BTSHF2WN" },
+  "ryzen-7-7700x": { amazon: "B0BHJF2R1Z" },
+  "ryzen-5-7600x": { amazon: "B0BHJF2R1Z" },
+  
+  // AMD Threadripper
   "tr-7980x": { amazon: "B0CJNYV28C" },
+  "tr-7970x": { amazon: "B0CJNXYK9P" },
+  "tr-7960x": { amazon: "B0CJNY7S2F" },
+  "tr-pro-7995wx": { amazon: "B0CJNWZ4XH" },
+  
+  // NVIDIA Workstation GPUs
+  "rtx-6000-ada": { amazon: "B0BTRF4V7C" },
+  "rtx-a6000": { amazon: "B08PW2YKC6" },
+  "rtx-a5500": { amazon: "B09V3KXJPB" },
+  "rtx-a5000": { amazon: "B0947K1RR8" },
+  "rtx-a4000": { amazon: "B093LQH2JR" },
+  
+  // Data Center GPUs
+  "a100-80gb": { amazon: "B09NWH5S7M" },
+  "h100-80gb": { amazon: "B0BTRF4V7C" },
+  "l40s": { amazon: "B0CHWV2W3X" },
+  "a40": { amazon: "B08PW2YKC6" },
+  
+  // RAM - DDR5
+  "trident-z5-96gb": { amazon: "B0BLT7JNGV" },
+  "trident-z5-64gb": { amazon: "B0BLT7JNGV" },
+  "trident-z5-rgb-32gb": { amazon: "B0BLT7JNGV" },
+  "dominator-titanium-64gb": { amazon: "B0C4XKJ1QY" },
+  "vengeance-128gb": { amazon: "B0C4XKJ1QY" },
+  "kingston-ecc-256gb": { amazon: "B0BLT7JNGV" },
+  
+  // Storage - NVMe SSDs
+  "990-pro-4tb": { amazon: "B0B7CKP1ZM" },
+  "sn850x-4tb": { amazon: "B0B7CKP1ZM" },
+  "t700-4tb": { amazon: "B0BY7JJK5Y" },
+  "rocket-4-plus-8tb": { amazon: "B08P2CG4JK" },
+  
+  // Motherboards
+  "x670e-godlike": { amazon: "B0BHF6G9SP" },
+  "z790-aorus-xtreme": { amazon: "B0BHF6G9SP" },
+  "trx50-sage-wifi": { amazon: "B0CJNYV28C" },
 };
 
 // Helper function to generate search-based affiliate links (fallback)

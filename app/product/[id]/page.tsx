@@ -7,7 +7,7 @@ import {
   type HardwareComponent,
 } from "@/lib/constants";
 import Navbar from "@/components/Navbar";
-import HardwareDashboardClient from "@/components/HardwareDashboardClient";
+import ProductDetail from "@/components/ProductDetail";
 import ProductReviews from "@/components/ProductReviews";
 
 // Generate static paths for all products
@@ -234,17 +234,8 @@ export default async function ProductPage({
 
       <Navbar />
 
-      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Hardware Dashboard Client Component with Animations */}
-        <HardwareDashboardClient
-          component={component}
-          similarProducts={similarProducts}
-        />
-
-        {/* Reviews Section */}
-        <div className="mt-16">
-          <ProductReviews component={component} />
-        </div>
+      <main className="min-h-screen bg-[#0f0f13]">
+        <ProductDetail component={component} similarProducts={similarProducts} />
       </main>
     </div>
   );
