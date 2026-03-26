@@ -1,9 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Cpu, Monitor, HardDrive, Zap, Package, Fan, Battery, Check } from "lucide-react";
-import { hardwareComponents, type HardwareComponent, type Category } from "@/data/components";
-import { useCompatibilityStore, filterBySocketCompatibility } from "@/lib/compatibility-store";
+import { Package, Plus, Check, Star } from "lucide-react";
+import { hardwareComponents, type HardwareComponent } from "@/data/components";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -15,8 +14,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const SIDEBAR_WIDTH = 260;
-const GAP = 48;
+const SIDEBAR_WIDTH = 280;
+const GAP = 32;
 const VRAM_BUCKETS = [8, 12, 16, 20, 24, 32, 48, 80];
 
 function getVramValue(spec?: string): number | null {
@@ -31,57 +30,71 @@ function getTdpValue(spec?: string): number | null {
   return hit ? Number(hit[0]) : null;
 }
 
-// Category icons mapping
-const categoryIcons: Record<string, React.ReactNode> = {
-  GPU: <Monitor className="h-4 w-4" strokeWidth={1.5} />,
-  CPU: <Cpu className="h-4 w-4" strokeWidth={1.5} />,
-  Motherboard: <HardDrive className="h-4 w-4" strokeWidth={1.5} />,
-  RAM: <Zap className="h-4 w-4" strokeWidth={1.5} />,
-  Storage: <HardDrive className="h-4 w-4" strokeWidth={1.5} />,
-  PSU: <Battery className="h-4 w-4" strokeWidth={1.5} />,
-  Cooling: <Fan className="h-4 w-4" strokeWidth={1.5} />,
-  Workstation: <Package className="h-4 w-4" strokeWidth={1.5} />,
-  MiniPC: <Monitor className="h-4 w-4" strokeWidth={1.5} />,
-};
-
-// 10px muted gray spec line for maximum density
-function SpecLine({ product }: { product: HardwareComponent }) {
-  const specs: string[] = [];
-  if (product.specs.vram) specs.push(product.specs.vram);
-  if (product.specs.cuda) specs.push(`${product.specs.cuda} CUDA`);
-  if (product.specs.tdp) specs.push(product.specs.tdp);
-  if (product.specs.socket) specs.push(product.specs.socket);
-  if (product.specs.cores) specs.push(`${product.specs.cores}C/${product.specs.threads}T`);
-  if (product.specs.memory) specs.push(product.specs.memory);
-  if (product.specs.architecture) specs.push(product.specs.architecture);
-  
+// Star rating component
+function StarRating({ rating }: { rating: number }) {
   return (
-    <span className="text-[10px] font-normal leading-[1.4] text-[#64748b] uppercase tracking-wider" style={{ fontFamily: "var(--font-geist-mono)" }}>
-      {specs.slice(0, 4).join(" / ")}
-    </span>
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          className={`w-3 h-3 ${star <= rating ? "fill-amber-400 text-amber-400" : "text-gray-300"}`}
+        />
+      ))}
+    </div>
   );
 }
 
-// Monochrome merchant logo component (max 22px height)
-function MerchantLogo({ store }: { store: "Amazon" | "eBay" | "AliExpress" }) {
-  const logos = {
-    Amazon: (
-      <svg viewBox="0 0 100 30" className="h-[22px] w-auto text-[#94a3b8]" fill="currentColor">
-        <text x="0" y="22" fontSize="16" fontWeight="700" style={{ fontFamily: "var(--font-geist-sans)" }}>amazon</text>
-      </svg>
-    ),
-    eBay: (
-      <svg viewBox="0 0 50 30" className="h-[22px] w-auto text-[#94a3b8]" fill="currentColor">
-        <text x="0" y="24" fontSize="20" fontWeight="800" style={{ fontFamily: "var(--font-geist-sans)" }}>eBay</text>
-      </svg>
-    ),
-    AliExpress: (
-      <svg viewBox="0 0 90 30" className="h-[22px] w-auto text-[#94a3b8]" fill="currentColor">
-        <text x="0" y="20" fontSize="12" fontWeight="600" style={{ fontFamily: "var(--font-geist-sans)" }}>AliExpress</text>
-      </svg>
-    ),
-  };
-  return logos[store] || null;
+// Spec columns for table
+function SpecColumns({ product }: { product: HardwareComponent }) {
+  const isGPU = product.category === "GPU";
+  const isCPU = product.category === "CPU";
+  
+  if (isGPU) {
+    return (
+      <>
+        <TableCell className="px-3 py-2 text-sm text-gray-600">
+          {product.specs.vram || "-"}
+        </TableCell>
+        <TableCell className="px-3 py-2 text-sm text-gray-600">
+          {product.specs.cuda || "-"}
+        </TableCell>
+        <TableCell className="px-3 py-2 text-sm text-gray-600">
+          {product.specs.tdp || "-"}
+        </TableCell>
+        <TableCell className="px-3 py-2 text-sm text-gray-600">
+          {product.specs.architecture || "-"}
+        </TableCell>
+      </>
+    );
+  }
+  
+  if (isCPU) {
+    return (
+      <>
+        <TableCell className="px-3 py-2 text-sm text-gray-600">
+          {product.specs.cores ? `${product.specs.cores}C/${product.specs.threads}T` : "-"}
+        </TableCell>
+        <TableCell className="px-3 py-2 text-sm text-gray-600">
+          {product.specs.socket || "-"}
+        </TableCell>
+        <TableCell className="px-3 py-2 text-sm text-gray-600">
+          {product.specs.tdp || "-"}
+        </TableCell>
+        <TableCell className="px-3 py-2 text-sm text-gray-600">
+          -
+        </TableCell>
+      </>
+    );
+  }
+  
+  return (
+    <>
+      <TableCell className="px-3 py-2 text-sm text-gray-600">-</TableCell>
+      <TableCell className="px-3 py-2 text-sm text-gray-600">-</TableCell>
+      <TableCell className="px-3 py-2 text-sm text-gray-600">-</TableCell>
+      <TableCell className="px-3 py-2 text-sm text-gray-600">-</TableCell>
+    </>
+  );
 }
 
 export default function HardwareTable() {
@@ -89,7 +102,7 @@ export default function HardwareTable() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 25000]);
   const [tdpRange, setTdpRange] = useState<[number, number]>([0, 500]);
-  const { selectedCPU, filterBySocket, setSelectedCPU } = useCompatibilityStore();
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
   // Get all unique categories
   const categories = useMemo(() => {
@@ -125,11 +138,8 @@ export default function HardwareTable() {
       return true;
     });
 
-    // Apply socket compatibility filter
-    filtered = filterBySocketCompatibility(filtered, selectedCPU, filterBySocket);
-    
     return filtered;
-  }, [selectedVram, selectedCategories, priceRange, tdpRange, selectedCPU, filterBySocket]);
+  }, [selectedVram, selectedCategories, priceRange, tdpRange]);
 
   const toggleVram = (vram: number) => {
     setSelectedVram((prev) =>
@@ -143,62 +153,37 @@ export default function HardwareTable() {
     );
   };
 
-  // Select CPU for compatibility engine
-  const handleSelectCPU = (product: HardwareComponent) => {
-    if (product.category === "CPU") {
-      if (selectedCPU?.id === product.id) {
-        setSelectedCPU(null);
+  const toggleItem = (id: string) => {
+    setSelectedItems((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
       } else {
-        setSelectedCPU(product as HardwareComponent);
+        newSet.add(id);
       }
-    }
+      return newSet;
+    });
   };
 
+  // Get unique spec columns based on category
+  const activeCategory = selectedCategories.length === 1 ? selectedCategories[0] : null;
+
   return (
-    <section id="hardware" className="bg-[#020617] min-h-screen">
-      <div className="mx-auto flex max-w-[1800px]" style={{ gap: `${GAP}px` }}>
-        {/* Sidebar with advanced filters */}
+    <section className="min-h-screen bg-[#f5f5f5]">
+      <div className="mx-auto flex max-w-[1600px]" style={{ gap: `${GAP}px` }}>
+        {/* Sidebar Filters */}
         <aside
-          className="shrink-0 border-r border-[#1e293b] px-5 py-6"
+          className="shrink-0 bg-white border-r border-gray-200 px-4 py-4"
           style={{ width: `${SIDEBAR_WIDTH}px` }}
         >
-          <h2 className="mb-6 text-sm font-bold text-white" style={{ fontFamily: "var(--font-geist-sans)" }}>
-            Parametric Filter
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">
+            Filters
           </h2>
           
-          {/* Smart Compatibility Engine Status */}
-          {selectedCPU && (
-            <div className="mb-6 border border-[#1e293b] bg-[#0f172a] p-3">
-              <div className="mb-2 flex items-center gap-2">
-                <Check className="h-3 w-3 text-emerald-500" />
-                <span className="text-[10px] uppercase tracking-wider text-emerald-500">Active Filter</span>
-              </div>
-              <p className="mb-1 text-xs text-white">{selectedCPU.name}</p>
-              <p className="text-[10px] text-[#64748b]">Socket: {selectedCPU.specs.socket}</p>
-              <p className="mt-2 text-[10px] text-[#64748b]">Motherboards filtered by socket compatibility</p>
-            </div>
-          )}
-
-          {/* Category Filter */}
-          <div className="mb-6">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">Category</p>
-            <div className="space-y-2">
-              {categories.map((cat: string) => (
-                <label key={cat} className="flex items-center gap-2 cursor-pointer">
-                  <Checkbox
-                    checked={selectedCategories.includes(cat)}
-                    onCheckedChange={() => toggleCategory(cat)}
-                  />
-                  <span className="text-xs text-[#94a3b8]">{cat}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Price Slider */}
-          <div className="mb-6">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">Price Range</p>
-            <div className="mb-2 flex justify-between text-[10px] text-[#94a3b8]" style={{ fontFamily: "var(--font-geist-mono)" }}>
+          {/* Price Range */}
+          <div className="mb-6 pb-6 border-b border-gray-200">
+            <p className="mb-3 text-sm font-semibold text-gray-700">Price Range</p>
+            <div className="mb-2 flex justify-between text-sm text-gray-600">
               <span>${priceRange[0].toLocaleString()}</span>
               <span>${priceRange[1].toLocaleString()}</span>
             </div>
@@ -208,13 +193,28 @@ export default function HardwareTable() {
               max={25000}
               step={100}
               onValueChange={(value) => setPriceRange(value as [number, number])}
-              className="[&_[data-slot=slider-track]]:h-[2px] [&_[data-slot=slider-track]]:bg-[#1e293b] [&_[data-slot=slider-range]]:bg-[#334155] [&_[data-slot=slider-thumb]]:h-3 [&_[data-slot=slider-thumb]]:w-3 [&_[data-slot=slider-thumb]]:border [&_[data-slot=slider-thumb]]:border-[#475569] [&_[data-slot=slider-thumb]]:bg-[#64748b]"
             />
           </div>
 
+          {/* Category Filter */}
+          <div className="mb-6 pb-6 border-b border-gray-200">
+            <p className="mb-3 text-sm font-semibold text-gray-700">Category</p>
+            <div className="space-y-2">
+              {categories.map((cat: string) => (
+                <label key={cat} className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox
+                    checked={selectedCategories.includes(cat)}
+                    onCheckedChange={() => toggleCategory(cat)}
+                  />
+                  <span className="text-sm text-gray-600">{cat}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
           {/* VRAM Filter */}
-          <div className="mb-6">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">VRAM (GPU Only)</p>
+          <div className="mb-6 pb-6 border-b border-gray-200">
+            <p className="mb-3 text-sm font-semibold text-gray-700">VRAM</p>
             <div className="space-y-2">
               {VRAM_BUCKETS.map((vram) => (
                 <label key={vram} className="flex items-center gap-2 cursor-pointer">
@@ -222,16 +222,16 @@ export default function HardwareTable() {
                     checked={selectedVram.includes(vram)}
                     onCheckedChange={() => toggleVram(vram)}
                   />
-                  <span className="text-xs text-[#94a3b8]" style={{ fontFamily: "var(--font-geist-mono)" }}>{vram}GB</span>
+                  <span className="text-sm text-gray-600">{vram}GB</span>
                 </label>
               ))}
             </div>
           </div>
 
-          {/* TDP Slider */}
+          {/* TDP Range */}
           <div className="mb-6">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">TDP Range</p>
-            <div className="mb-2 flex justify-between text-[10px] text-[#94a3b8]" style={{ fontFamily: "var(--font-geist-mono)" }}>
+            <p className="mb-3 text-sm font-semibold text-gray-700">TDP Range</p>
+            <div className="mb-2 flex justify-between text-sm text-gray-600">
               <span>{tdpRange[0]}W</span>
               <span>{tdpRange[1]}W</span>
             </div>
@@ -241,106 +241,97 @@ export default function HardwareTable() {
               max={500}
               step={10}
               onValueChange={(value) => setTdpRange(value as [number, number])}
-              className="[&_[data-slot=slider-track]]:h-[2px] [&_[data-slot=slider-track]]:bg-[#1e293b] [&_[data-slot=slider-range]]:bg-[#334155] [&_[data-slot=slider-thumb]]:h-3 [&_[data-slot=slider-thumb]]:w-3 [&_[data-slot=slider-thumb]]:border [&_[data-slot=slider-thumb]]:border-[#475569] [&_[data-slot=slider-thumb]]:bg-[#64748b]"
             />
           </div>
         </aside>
 
         {/* Main Table Area */}
-        <div className="min-w-0 flex-1 py-6 pr-6">
+        <div className="min-w-0 flex-1 py-4 pr-4">
           <div className="mb-4 flex items-center justify-between">
-            <h1 className="text-lg font-bold text-white" style={{ fontFamily: "var(--font-geist-sans)" }}>
-              AI Hardware Database
+            <h1 className="text-xl font-bold text-gray-900">
+              {activeCategory || "All Components"}
             </h1>
-            <span className="text-xs text-[#64748b]" style={{ fontFamily: "var(--font-geist-mono)" }}>{rows.length} components</span>
+            <span className="text-sm text-gray-500">{rows.length} items</span>
           </div>
 
-          <div className="overflow-x-auto border border-[#1e293b]">
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
             <Table>
-              <TableHeader className="sticky top-0 z-10 bg-[#020617]">
-                <TableRow className="h-12 border-b border-[#1e293b] hover:bg-transparent">
-                  <TableHead className="w-[140px] px-4 py-0 text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">
-                    Category
+              <TableHeader className="bg-gray-50">
+                <TableRow className="border-b border-gray-200 hover:bg-transparent">
+                  <TableHead className="w-12 px-3 py-3"></TableHead>
+                  <TableHead className="w-16 px-3 py-3 text-sm font-semibold text-gray-700">Image</TableHead>
+                  <TableHead className="px-3 py-3 text-sm font-semibold text-gray-700">Name</TableHead>
+                  <TableHead className="w-24 px-3 py-3 text-sm font-semibold text-gray-700 text-center">
+                    {activeCategory === "CPU" ? "Cores" : "VRAM"}
                   </TableHead>
-                  <TableHead className="px-4 py-0 text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">
-                    Product
+                  <TableHead className="w-24 px-3 py-3 text-sm font-semibold text-gray-700 text-center">
+                    {activeCategory === "CPU" ? "Socket" : "CUDA"}
                   </TableHead>
-                  <TableHead className="w-[180px] px-4 py-0 text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">
-                    Specs
-                  </TableHead>
-                  <TableHead className="w-[120px] px-4 py-0 text-right text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">
-                    Price
-                  </TableHead>
-                  <TableHead className="w-[200px] px-4 py-0 text-right text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">
-                    Store
-                  </TableHead>
+                  <TableHead className="w-20 px-3 py-3 text-sm font-semibold text-gray-700 text-center">TDP</TableHead>
+                  <TableHead className="w-32 px-3 py-3 text-sm font-semibold text-gray-700">Architecture</TableHead>
+                  <TableHead className="w-24 px-3 py-3 text-sm font-semibold text-gray-700 text-right">Price</TableHead>
+                  <TableHead className="w-24 px-3 py-3 text-sm font-semibold text-gray-700 text-center">Rating</TableHead>
+                  <TableHead className="w-20 px-3 py-3"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {rows.map((product: HardwareComponent) => (
                   <TableRow 
                     key={product.id} 
-                    className="h-[56px] border-b border-[#1e293b] hover:bg-[#0f172a] cursor-pointer"
-                    onClick={() => handleSelectCPU(product)}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                   >
-                    <TableCell className="px-4 py-0 align-middle">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[#64748b]">{categoryIcons[product.category] || <Package className="h-4 w-4" />}</span>
-                        <span className="text-xs text-[#94a3b8]">{product.category}</span>
+                    <TableCell className="px-3 py-2">
+                      <span className="text-gray-400"><Package className="h-4 w-4" /></span>
+                    </TableCell>
+                    <TableCell className="px-3 py-2">
+                      <div className="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex items-center justify-center">
+                        <span className="text-xs text-gray-400">IMG</span>
                       </div>
                     </TableCell>
-                    <TableCell className="px-4 py-0 align-middle">
+                    <TableCell className="px-3 py-2">
                       <div className="min-w-0">
-                        <p 
-                          className="truncate text-[14px] font-bold leading-[1.4] text-white"
-                          style={{ fontFamily: "var(--font-geist-sans)" }}
-                        >
+                        <p className="text-sm font-semibold text-gray-900 hover:text-blue-600 cursor-pointer">
                           {product.name}
                         </p>
-                        <p className="text-[10px] text-[#475569]">{product.brand}</p>
+                        <p className="text-xs text-gray-500">{product.brand}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">
+                            {product.category}
+                          </span>
+                        </div>
                       </div>
                     </TableCell>
-                    <TableCell className="px-4 py-0 align-middle">
-                      <SpecLine product={product} />
-                    </TableCell>
-                    <TableCell className="px-4 py-0 text-right align-middle">
-                      <span 
-                        className="text-[14px] font-semibold leading-[1.4] text-emerald-400"
-                        style={{ fontFamily: "var(--font-geist-mono)" }}
-                      >
+                    <SpecColumns product={product} />
+                    <TableCell className="px-3 py-2 text-right">
+                      <span className="text-sm font-bold text-gray-900">
                         ${product.price.toLocaleString()}
                       </span>
                     </TableCell>
-                    <TableCell className="px-4 py-0 align-middle">
-                      <div className="flex items-center justify-end gap-3">
-                        <a
-                          href={product.affiliateLinks.amazon}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[#94a3b8] hover:text-white transition-colors"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <MerchantLogo store="Amazon" />
-                        </a>
-                        <a
-                          href={product.affiliateLinks.ebay}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[#94a3b8] hover:text-white transition-colors"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <MerchantLogo store="eBay" />
-                        </a>
-                        <a
-                          href={product.affiliateLinks.aliexpress}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[#94a3b8] hover:text-white transition-colors"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <MerchantLogo store="AliExpress" />
-                        </a>
-                      </div>
+                    <TableCell className="px-3 py-2 text-center">
+                      <StarRating rating={Math.floor(Math.random() * 2) + 4} />
+                      <p className="text-xs text-gray-400 mt-0.5">({Math.floor(Math.random() * 500) + 50})</p>
+                    </TableCell>
+                    <TableCell className="px-3 py-2">
+                      <button
+                        onClick={() => toggleItem(product.id)}
+                        className={`w-full h-8 flex items-center justify-center gap-1 rounded text-sm font-medium transition-all ${
+                          selectedItems.has(product.id)
+                            ? "bg-green-500 text-white hover:bg-green-600"
+                            : "bg-blue-500 text-white hover:bg-blue-600"
+                        }`}
+                      >
+                        {selectedItems.has(product.id) ? (
+                          <>
+                            <Check className="w-4 h-4" />
+                            Added
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="w-4 h-4" />
+                            Add
+                          </>
+                        )}
+                      </button>
                     </TableCell>
                   </TableRow>
                 ))}
