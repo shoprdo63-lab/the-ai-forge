@@ -1,23 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  /* Deep Slate Dark Mode - Luxury AI Theme */
-  --background: #020617;
-  --foreground: #f8fafc;
+  /* Quiet Luxury - Deep Obsidian Theme */
+  --background: #050505;
+  --foreground: #fafafa;
   --accent: #10b981;
-  --accent-hover: #0d9488;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --accent-hover: #059669;
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
   --border-subtle: rgba(255, 255, 255, 0.1);
-  --border-glow: rgba(16, 185, 129, 0.3);
-  --card-bg: rgba(255, 255, 255, 0.05);
-  --card-bg-hover: rgba(255, 255, 255, 0.08);
-  --card-border: rgba(255, 255, 255, 0.1);
-  --card-border-hover: rgba(16, 185, 129, 0.3);
-  --navbar-bg: rgba(2, 6, 23, 0.8);
-  --skeleton-bg: rgba(255, 255, 255, 0.1);
-  --skeleton-shine: rgba(255, 255, 255, 0.2);
+  --border-glow: rgba(16, 185, 129, 0.2);
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --card-bg-hover: rgba(255, 255, 255, 0.06);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-border-hover: rgba(255, 255, 255, 0.15);
+  --navbar-bg: rgba(5, 5, 5, 0.85);
+  --skeleton-bg: rgba(255, 255, 255, 0.05);
+  --skeleton-shine: rgba(255, 255, 255, 0.12);
+  
+  /* Tier Colors - Muted Luxury */
+  --tier-s: #f59e0b;
+  --tier-a: #10b981;
+  --tier-b: #3b82f6;
+  --tier-c: #71717a;
+  --tier-d: #52525b;
 }
 
 /* Light Mode */
@@ -76,40 +83,31 @@ h1, h2, h3, h4, h5, h6 {
   transition: color 0.5s ease;
 }
 
-/* Glassmorphism Card Component - Theme Aware */
+/* Quiet Luxury Glass Card - Refined Glassmorphism */
 .glass-card {
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: 12px;
-  transition: all 0.5s ease;
+  border-radius: 16px;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .glass-card:hover {
   background: var(--card-bg-hover);
   border-color: var(--card-border-hover);
-  box-shadow: 0 0 30px var(--border-glow);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  transform: scale(1.02);
 }
 
-/* Affiliate Button Pulse Animation */
-@keyframes affiliate-pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
-  }
-}
-
+/* Quiet Luxury Affiliate Button */
 .btn-affiliate {
   background: var(--accent);
-  color: #020617;
-  font-weight: 600;
+  color: #050505;
+  font-weight: 500;
   padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  animation: affiliate-pulse 2s ease-in-out infinite;
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .light .btn-affiliate {
@@ -118,8 +116,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn-affiliate:hover {
   background: var(--accent-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
 }
 
 /* Secondary Affiliate Button */
@@ -219,11 +217,11 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-primary);
 }
 
-/* Navbar Theme Aware */
+/* Quiet Luxury Navbar */
 .navbar-glass {
   background: var(--navbar-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border-subtle);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--card-border);
 }
 

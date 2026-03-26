@@ -12,55 +12,51 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-[#020617]">
-      {/* Gradient Glow Background */}
+    <section className="relative overflow-hidden bg-[#050505] border-b border-white/[0.06]">
+      {/* Subtle ambient glow - restrained */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* Top-left emerald glow */}
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#10b981]/20 rounded-full blur-[150px] opacity-60" />
-        {/* Center blue glow */}
-        <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-blue-600/15 rounded-full blur-[120px] opacity-50" />
-        {/* Bottom subtle gradient */}
-        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-[#020617] to-transparent" />
+        <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-[#10b981]/5 rounded-full blur-[120px] opacity-40" />
+        <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] bg-[#10b981]/3 rounded-full blur-[100px] opacity-30" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 max-w-[1800px] mx-auto px-6 py-24 md:py-32">
+      <div className="relative z-10 max-w-[1800px] mx-auto px-6 py-20 md:py-28">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="max-w-4xl"
+          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="max-w-3xl"
         >
           {/* Badge */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full border border-[#10b981]/30 bg-[#10b981]/10"
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 mb-8 rounded-full border border-[#10b981]/20 bg-[#10b981]/5"
           >
-            <Sparkles className="w-4 h-4 text-[#10b981]" />
-            <span className="text-sm font-medium text-[#10b981]">
+            <Sparkles className="w-3.5 h-3.5 text-[#10b981]" strokeWidth={1.5} />
+            <span className="text-xs font-medium text-[#10b981] tracking-wide">
               AI-Optimized Hardware
             </span>
           </motion.div>
 
-          {/* Main Title */}
+          {/* Main Title - Sophisticated Typography */}
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6"
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-[1.1] tracking-tight mb-6"
           >
             Premium Hardware for{" "}
-            <span className="text-[#10b981]">AI Workloads</span>
+            <span className="text-[#10b981] font-medium">AI Workloads</span>
           </motion.h1>
 
           {/* Subtitle */}
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="text-lg md:text-xl text-slate-400 leading-relaxed max-w-2xl mb-10"
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="text-base md:text-lg text-zinc-400 leading-relaxed max-w-xl mb-10"
           >
             Curated selection of GPUs and CPUs optimized for LLM inference and
             model training. Find the perfect components for your AI workstation.
@@ -68,22 +64,19 @@ export default function Hero() {
 
           {/* CTA Button */}
           <motion.button
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={scrollToProducts}
-            className="btn-affiliate inline-flex items-center gap-2 px-8 py-4 text-base"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#10b981] hover:bg-[#059669] text-[#050505] font-medium text-sm rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-[#10b981]/10"
           >
             <span>Explore Products</span>
-            <ArrowDown className="w-5 h-5" />
+            <ArrowDown className="w-4 h-4" strokeWidth={1.5} />
           </motion.button>
         </motion.div>
       </div>
-
-      {/* Bottom border */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#10b981]/50 to-transparent" />
     </section>
   );
 }

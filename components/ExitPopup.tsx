@@ -164,17 +164,17 @@ export default function ExitPopup({
             }}
             className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg z-[201]"
           >
-            <div className="relative h-full md:h-auto bg-slate-900/95 backdrop-blur-2xl border border-emerald-500/30 rounded-2xl shadow-2xl shadow-emerald-500/20 overflow-hidden">
-              {/* Glow effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-transparent to-emerald-500/20 rounded-2xl blur-xl opacity-50" />
+            <div className="relative h-full md:h-auto bg-[#050505]/95 backdrop-blur-2xl border border-[#10b981]/20 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
+              {/* Subtle glow - restrained */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#10b981]/10 via-transparent to-[#10b981]/10 rounded-2xl blur-xl opacity-30" />
 
               <div className="relative h-full md:h-auto flex flex-col">
                 {/* Close button */}
                 <button
                   onClick={handleClose}
-                  className="absolute top-4 right-4 z-10 p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                  className="absolute top-4 right-4 z-10 p-2 text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.05] rounded-lg transition-colors"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-5 h-5" strokeWidth={1.5} />
                 </button>
 
                 <div className="flex-1 overflow-y-auto p-6 md:p-8">
@@ -185,9 +185,9 @@ export default function ExitPopup({
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.2, type: "spring", damping: 15 }}
-                        className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-6"
+                        className="w-16 h-16 rounded-2xl bg-[#10b981]/10 border border-[#10b981]/20 flex items-center justify-center mx-auto mb-6"
                       >
-                        <TrendingDown className="w-8 h-8 text-emerald-400" />
+                        <TrendingDown className="w-8 h-8 text-[#10b981]" strokeWidth={1.5} />
                       </motion.div>
 
                       {/* Headline */}
@@ -195,7 +195,7 @@ export default function ExitPopup({
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="text-2xl font-bold text-white mb-3"
+                        className="text-2xl font-medium text-white mb-3"
                       >
                         {headline}
                       </motion.h2>
@@ -205,7 +205,7 @@ export default function ExitPopup({
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 }}
-                        className="text-slate-400 mb-6"
+                        className="text-zinc-400 mb-6"
                       >
                         {description}
                       </motion.p>
@@ -220,14 +220,14 @@ export default function ExitPopup({
                       >
                         <div className="relative">
                           <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                            <Mail className="w-5 h-5 text-slate-500" />
+                            <Mail className="w-5 h-5 text-zinc-600" strokeWidth={1.5} />
                           </div>
                           <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="Enter your email..."
-                            className="w-full pl-12 pr-4 py-4 bg-slate-950/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                            className="w-full pl-12 pr-4 py-4 bg-white/[0.02] border border-white/[0.08] rounded-xl text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-[#10b981]/30 focus:ring-2 focus:ring-[#10b981]/10 transition-all"
                             style={{ fontSize: "16px" }}
                             autoFocus
                           />
@@ -239,7 +239,7 @@ export default function ExitPopup({
                             animate={{ opacity: 1, y: 0 }}
                             className="flex items-center gap-2 text-sm text-red-400"
                           >
-                            <AlertCircle className="w-4 h-4" />
+                            <AlertCircle className="w-4 h-4" strokeWidth={1.5} />
                             {error}
                           </motion.div>
                         )}
@@ -247,17 +247,17 @@ export default function ExitPopup({
                         <button
                           type="submit"
                           disabled={isSubmitting}
-                          className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+                          className="w-full py-4 bg-[#10b981] hover:bg-[#059669] disabled:bg-zinc-800 text-[#050505] font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
                         >
                           {isSubmitting ? (
                             <>
-                              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              <div className="w-5 h-5 border-2 border-[#050505]/30 border-t-[#050505] rounded-full animate-spin" />
                               Subscribing...
                             </>
                           ) : (
                             <>
                               Get Price Alerts
-                              <ArrowRight className="w-5 h-5" />
+                              <ArrowRight className="w-5 h-5" strokeWidth={1.5} />
                             </>
                           )}
                         </button>
@@ -268,12 +268,12 @@ export default function ExitPopup({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.6 }}
-                        className="mt-6 flex items-center justify-center gap-4 text-xs text-slate-500"
+                        className="mt-6 flex items-center justify-center gap-4 text-xs text-zinc-600"
                       >
                         <span>No spam</span>
-                        <span className="w-1 h-1 bg-slate-600 rounded-full" />
+                        <span className="w-1 h-1 bg-zinc-700 rounded-full" />
                         <span>Unsubscribe anytime</span>
-                        <span className="w-1 h-1 bg-slate-600 rounded-full" />
+                        <span className="w-1 h-1 bg-zinc-700 rounded-full" />
                         <span>5,000+ subscribers</span>
                       </motion.div>
                     </div>
@@ -287,17 +287,17 @@ export default function ExitPopup({
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ type: "spring", damping: 15 }}
-                        className="w-20 h-20 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center mx-auto mb-6"
+                        className="w-20 h-20 rounded-full bg-[#10b981]/10 border border-[#10b981]/20 flex items-center justify-center mx-auto mb-6"
                       >
-                        <Check className="w-10 h-10 text-emerald-400" />
+                        <Check className="w-10 h-10 text-[#10b981]" strokeWidth={1.5} />
                       </motion.div>
-                      <h3 className="text-2xl font-bold text-white mb-2">
-                        You&apos;re In! 🎉
+                      <h3 className="text-2xl font-medium text-white mb-2">
+                        You&apos;re In!
                       </h3>
-                      <p className="text-slate-400 mb-2">
+                      <p className="text-zinc-400 mb-2">
                         Watch your inbox for GPU deals!
                       </p>
-                      <p className="text-sm text-emerald-400">
+                      <p className="text-sm text-[#10b981]">
                         Closing automatically...
                       </p>
                     </motion.div>

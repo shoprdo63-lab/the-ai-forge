@@ -40,11 +40,11 @@ function SecondaryAffiliateButton({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-center gap-1.5 flex-1 px-3 py-2 bg-slate-800/80 text-slate-300 text-xs font-medium rounded-lg hover:bg-slate-700 hover:text-white transition-all duration-200 border border-slate-700"
+      className="flex items-center justify-center gap-1.5 flex-1 px-3 py-2 bg-white/[0.03] text-zinc-400 text-xs font-medium rounded-lg hover:bg-white/[0.06] hover:text-zinc-300 transition-all duration-200 border border-white/[0.06]"
       onClick={(e) => e.stopPropagation()}
     >
       <span>{label}</span>
-      <ExternalLink className="w-3 h-3" />
+      <ExternalLink className="w-3 h-3" strokeWidth={1.5} />
     </a>
   );
 }
@@ -63,9 +63,9 @@ function TierBadge({ tier }: { tier: keyof typeof TIER_COLORS }) {
 function SpecBadge({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
   return (
     <div className="flex items-center gap-2">
-      <Icon className="w-3.5 h-3.5 text-slate-500" />
-      <span className="text-[10px] text-slate-400 uppercase tracking-wider">{label}</span>
-      <span className="text-xs text-slate-200 font-medium">{value}</span>
+      <Icon className="w-3.5 h-3.5 text-zinc-600" strokeWidth={1.5} />
+      <span className="text-[10px] text-zinc-500 uppercase tracking-wider">{label}</span>
+      <span className="text-xs text-zinc-300 font-medium">{value}</span>
     </div>
   );
 }
@@ -75,8 +75,8 @@ function MetricBar({ label, value, max = 100 }: { label: string; value: number; 
   const percentage = Math.min(100, Math.max(0, (value / max) * 100));
   return (
     <div className="flex items-center gap-3">
-      <span className="text-[10px] text-slate-400 uppercase tracking-wider w-20">{label}</span>
-      <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+      <span className="text-[10px] text-zinc-500 uppercase tracking-wider w-20">{label}</span>
+      <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
@@ -106,13 +106,13 @@ export default function AICard({ component, index }: AICardProps) {
         y: -4,
         transition: { duration: 0.2 }
       }}
-      className="group relative flex flex-col bg-[#020617]/80 backdrop-blur-md rounded-xl border border-slate-800 overflow-hidden hover:border-[#10b981]/30 transition-colors duration-300"
+      className="group relative flex flex-col bg-white/[0.02] backdrop-blur-md rounded-2xl border border-white/[0.06] overflow-hidden hover:border-[#10b981]/20 transition-colors duration-300"
     >
-      {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-800/10 via-transparent to-[#10b981]/5 pointer-events-none" />
+      {/* Subtle gradient overlay - restrained */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] via-transparent to-[#10b981]/[0.02] pointer-events-none" />
 
       {/* Header section */}
-      <div className="relative p-4 pb-3 border-b border-slate-800/60">
+      <div className="relative p-5 pb-4 border-b border-white/[0.06]">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
@@ -123,21 +123,21 @@ export default function AICard({ component, index }: AICardProps) {
                 <span className="text-[10px] text-amber-400 font-medium">Out of Stock</span>
               )}
             </div>
-            <h3 className="text-sm font-semibold text-slate-100 leading-tight line-clamp-2 group-hover:text-[#10b981] transition-colors">
+            <h3 className="text-sm font-medium text-zinc-200 leading-tight line-clamp-2 group-hover:text-[#10b981] transition-colors">
               {component.name}
             </h3>
-            <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">
+            <p className="text-[10px] text-zinc-600 mt-1 uppercase tracking-wider">
               {component.brand} · {component.category}
             </p>
           </div>
           
           {/* Price tag with Electric Emerald */}
           <div className="flex flex-col items-end">
-            <span className="text-xl font-bold text-[#10b981] font-mono">
+            <span className="text-xl font-semibold text-[#10b981] font-mono">
               ${component.price.toLocaleString()}
             </span>
             {component.price < component.msrp && (
-              <span className="text-[10px] text-slate-500 line-through">
+              <span className="text-[10px] text-zinc-600 line-through">
                 ${component.msrp.toLocaleString()}
               </span>
             )}
@@ -146,7 +146,7 @@ export default function AICard({ component, index }: AICardProps) {
       </div>
 
       {/* Specs section */}
-      <div className="relative px-4 py-3 space-y-2 border-b border-slate-800/60">
+      <div className="relative px-5 py-3 space-y-2 border-b border-white/[0.06]">
         {isGPU && specs.vram && (
           <SpecBadge icon={Database} label="VRAM" value={specs.vram} />
         )}
@@ -163,8 +163,8 @@ export default function AICard({ component, index }: AICardProps) {
 
       {/* AI Intelligence metrics - only for GPUs */}
       {isGPU && (
-        <div className="relative px-4 py-3 space-y-2 border-b border-slate-800/60 bg-slate-900/30">
-          <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">AI Intelligence</p>
+        <div className="relative px-5 py-3 space-y-2 border-b border-white/[0.06] bg-white/[0.01]">
+          <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-2">AI Intelligence</p>
           <MetricBar label="Inference" value={aiIntelligence.inferenceScore} />
           <MetricBar label="Training" value={aiIntelligence.trainingScore} />
           <MetricBar label="Efficiency" value={aiIntelligence.efficiencyScore} />
@@ -180,8 +180,8 @@ export default function AICard({ component, index }: AICardProps) {
       )}
 
       {/* Description */}
-      <div className="relative px-4 py-3 flex-1">
-        <p className="text-xs text-slate-400 leading-relaxed line-clamp-2">
+      <div className="relative px-5 py-3 flex-1">
+        <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2">
           {component.description}
         </p>
         
@@ -190,7 +190,7 @@ export default function AICard({ component, index }: AICardProps) {
           {component.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="px-1.5 py-0.5 text-[10px] text-slate-500 bg-slate-800/60 rounded"
+              className="px-2 py-0.5 text-[10px] text-zinc-600 bg-white/[0.03] border border-white/[0.06] rounded"
             >
               {tag}
             </span>
@@ -199,7 +199,7 @@ export default function AICard({ component, index }: AICardProps) {
       </div>
 
       {/* Affiliate links footer - Prominent Buy Section */}
-      <div className="relative p-4 pt-3 bg-slate-900/40 border-t border-slate-800/60 space-y-3">
+      <div className="relative p-5 pt-3 bg-white/[0.01] border-t border-white/[0.06] space-y-3">
         {/* Primary Amazon Buy Button */}
         <BuyButton href={affiliateLinks.amazon} label="Amazon" />
         
