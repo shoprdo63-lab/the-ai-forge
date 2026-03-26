@@ -114,7 +114,6 @@ const nextConfig = {
   experimental: {
     mdxRs: true,
     optimizeCss: true,
-    cacheComponents: true,
     serverActions: {
       bodySizeLimit: '2mb',
     },
@@ -192,6 +191,12 @@ const nextConfig = {
       },
     ];
   },
+  
+  // ============================================
+  // Turbopack Configuration
+  // ============================================
+  
+  turbopack: {},
   
   // ============================================
   // Webpack Configuration
