@@ -30,6 +30,7 @@ import { products, Product, getProductById } from "@/lib/products";
 import { ComparisonTable } from "@/components/compare/ComparisonTable";
 import { AIRadarChart } from "@/components/compare/AIRadarChart";
 import { HardwareSilhouette } from "@/components/compare/HardwareSilhouette";
+import { EnterpriseScaleWarning } from "@/components/enterprise/EnterpriseScaleWarning";
 import { toPng } from "html-to-image";
 
 // ============================================
@@ -574,6 +575,9 @@ function ComparePageContent() {
 
         {validProducts.length >= 2 && (
           <>
+            {/* Enterprise Scale Warning */}
+            <EnterpriseScaleWarning products={validProducts} />
+            
             {/* AI Radar Chart */}
             <section className="mb-12">
               <div className="flex items-center gap-3 mb-6">

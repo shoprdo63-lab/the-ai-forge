@@ -13,7 +13,8 @@ import {
   Thermometer,
   DollarSign,
   Award,
-  Layers
+  Layers,
+  TrendingUp
 } from "lucide-react";
 
 interface ComparisonTableProps {
@@ -139,6 +140,49 @@ export function ComparisonTable({ products, winner }: ComparisonTableProps) {
           higherIsBetter: false,
           format: (val) => val.toString(),
           highlight: false,
+        },
+        // Enterprise GPU specs
+        {
+          label: "HBM3e",
+          key: "hbmCapacity",
+          icon: <Layers className="w-4 h-4" />,
+          getValue: (p) => p.specs.hbmCapacity || "N/A",
+          higherIsBetter: true,
+          format: (val) => val.toString(),
+          highlight: true,
+        },
+        {
+          label: "NVLink",
+          key: "nvlinkVersion",
+          icon: <Zap className="w-4 h-4" />,
+          getValue: (p) => p.specs.nvlinkVersion || "N/A",
+          higherIsBetter: true,
+          format: (val) => val.toString(),
+          highlight: false,
+        },
+        {
+          label: "FP8 Perf",
+          key: "fp8Performance",
+          icon: <TrendingUp className="w-4 h-4" />,
+          getValue: (p) => {
+            const match = p.specs.fp8Performance?.match(/([\d.]+)/);
+            return match ? parseFloat(match[1]) : 0;
+          },
+          higherIsBetter: true,
+          format: (val) => val ? `${val} PFLOPS` : "N/A",
+          highlight: true,
+        },
+        {
+          label: "FP16 Perf",
+          key: "fp16Performance",
+          icon: <TrendingUp className="w-4 h-4" />,
+          getValue: (p) => {
+            const match = p.specs.fp16Performance?.match(/([\d.]+)/);
+            return match ? parseFloat(match[1]) : 0;
+          },
+          higherIsBetter: true,
+          format: (val) => val ? `${val} PFLOPS` : "N/A",
+          highlight: true,
         },
       ];
     }
