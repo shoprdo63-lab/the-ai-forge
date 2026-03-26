@@ -389,7 +389,7 @@ function ProductTable({
           <TableBody>
             {products.map((product) => {
               const vram = extractVram(product.specs);
-              const bestLink = product.directLinks?.amazon || product.affiliateLinks.amazon;
+              const bestLink = product.directLinks?.amazon || "#";
 
               return (
                 <TableRow
@@ -482,7 +482,7 @@ function ProductTable({
       {/* Mobile List View */}
       <div className="md:hidden divide-y divide-[#e5e7eb]">
         {products.map((product) => {
-          const bestLink = product.directLinks?.amazon || product.affiliateLinks.amazon;
+          const bestLink = product.directLinks?.amazon || "#";
 
           return (
             <div key={product.id} className="p-4 hover:bg-[#f9fafb]">

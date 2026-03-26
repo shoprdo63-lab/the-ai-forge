@@ -332,7 +332,7 @@ export default function ProductDetail({ component, similarProducts }: ProductDet
                     ))
                   ) : (
                     <a
-                      href={component.directLinks?.amazon || component.affiliateLinks.amazon}
+                      href={component.directLinks?.amazon || "#"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2 w-full py-3 bg-[#ff9900] hover:bg-[#ff8800] text-white font-semibold rounded-lg transition-colors"

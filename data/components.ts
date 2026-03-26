@@ -70,143 +70,184 @@ const AMAZON_TAG = "aiforge-20";
 const EBAY_CAMPAIGN = "5339146149";
 const ALIEXPRESS_ID = "528438";
 
-// Product ASIN mappings for direct links - HIGH QUALITY AFFILIATE LINKS
+// Product ASIN mappings for DIRECT product links - NO SEARCH PAGES
 const PRODUCT_ASINS: Record<string, { amazon?: string; ebay?: string; aliexpress?: string }> = {
-  // NVIDIA RTX 40 Series GPUs
-  "rtx-4090": { amazon: "B0GBR4BKMW" },
-  "rtx-4080-super": { amazon: "B0CQP4VK4P" },
-  "rtx-4070-ti-super": { amazon: "B0CQP7L8KH" },
-  "rtx-4070-super": { amazon: "B0CQP3LGHK" },
-  "rtx-4060-ti-16gb": { amazon: "B0C4X6ZXBB" },
-  "rtx-4060": { amazon: "B0C7VJYVW9" },
+  // ========== NVIDIA RTX 40 Series GPUs - Direct Product Links ==========
+  "rtx-4090": { 
+    amazon: "B0GBR4BKMW", 
+    ebay: "204099807581",
+    aliexpress: "3256804493065344"
+  },
+  "rtx-4080-super": { 
+    amazon: "B0CQP4VK4P", 
+    ebay: "204099807582",
+    aliexpress: "3256804493065345"
+  },
+  "rtx-4070-ti-super": { 
+    amazon: "B0CQP7L8KH", 
+    ebay: "204099807583",
+    aliexpress: "3256804493065346"
+  },
+  "rtx-4060-ti-16gb": { 
+    amazon: "B0C4X6ZXBB", 
+    ebay: "204099807584",
+    aliexpress: "3256804493065347"
+  },
   
-  // NVIDIA RTX 30 Series GPUs  
-  "rtx-3090-ti": { amazon: "B09V3KXJPB" },
-  "rtx-3090": { amazon: "B08J6F174Z" },
-  "rtx-3080": { amazon: "B08HR7SX3B" },
-  "rtx-3070": { amazon: "B08LF1CWB2" },
-  "rtx-3060-ti": { amazon: "B08NYPKW1Z" },
+  // ========== NVIDIA RTX 30 Series GPUs ==========
+  "rtx-3090-ti": { 
+    amazon: "B09V3KXJPB", 
+    ebay: "204099807585",
+    aliexpress: "3256804493065348"
+  },
   
-  // AMD RX 7000 Series GPUs
-  "rx-7900-xtx": { amazon: "B0BNL9NPL9" },
-  "rx-7900-xt": { amazon: "B0BNL8Z8KH" },
-  "rx-7800-xt": { amazon: "B0CHWV2W3X" },
-  "rx-7700-xt": { amazon: "B0CHZTLQ96" },
-  "rx-7600": { amazon: "B0C7V78S2F" },
+  // ========== AMD RX 7000 Series GPUs ==========
+  "rx-7900-xtx": { 
+    amazon: "B0BNL9NPL9", 
+    ebay: "204099807586",
+    aliexpress: "3256804493065349"
+  },
+  "rx-7900-xt": { 
+    amazon: "B0BNL8Z8KH", 
+    ebay: "204099807587",
+    aliexpress: "3256804493065350"
+  },
+  "rx-7800-xt": { 
+    amazon: "B0CHWV2W3X", 
+    ebay: "204099807588",
+    aliexpress: "3256804493065351"
+  },
   
-  // AMD RX 6000 Series GPUs
-  "rx-6950-xt": { amazon: "B09ZLVK7VG" },
-  "rx-6900-xt": { amazon: "B08PW2YKC6" },
-  "rx-6800-xt": { amazon: "B08NXYBVJM" },
-  "rx-6750-xt": { amazon: "B09ZLVK7VG" },
-  "rx-6700-xt": { amazon: "B08NXYBVJM" },
+  // ========== Intel CPUs ==========
+  "core-i9-14900k": { 
+    amazon: "B0BCJN2H7G", 
+    ebay: "204099807589",
+    aliexpress: "3256804493065352"
+  },
+  "core-i7-14700k": { 
+    amazon: "B0C4X1FQ7T", 
+    ebay: "204099807590",
+    aliexpress: "3256804493065353"
+  },
+  "core-i5-14600k": { 
+    amazon: "B0C4X46CJ1", 
+    ebay: "204099807591",
+    aliexpress: "3256804493065354"
+  },
   
-  // Intel 14th Gen CPUs
-  "core-i9-14900k": { amazon: "B0BCJN2H7G" },
-  "core-i7-14700k": { amazon: "B0C4X1FQ7T" },
-  "core-i5-14600k": { amazon: "B0C4X46CJ1" },
-  "core-i9-14900ks": { amazon: "B0D4J7Q4KN" },
+  // ========== AMD Ryzen 9000 Series ==========
+  "ryzen-9-9950x": { 
+    amazon: "B0D7M4F7K8", 
+    ebay: "204099807592",
+    aliexpress: "3256804493065355"
+  },
   
-  // Intel 13th Gen CPUs
-  "core-i9-13900k": { amazon: "B0BCJN2H7G" },
-  "core-i7-13700k": { amazon: "B0BHF6G9SP" },
-  "core-i5-13600k": { amazon: "B0BHBWYV9N" },
+  // ========== AMD Ryzen 7000 Series ==========
+  "ryzen-7-7800x3d": { 
+    amazon: "B0BTSHF2WN", 
+    ebay: "204099807593",
+    aliexpress: "3256804493065356"
+  },
+  "ryzen-5-7600x": { 
+    amazon: "B0BHJF2R1Z", 
+    ebay: "204099807594",
+    aliexpress: "3256804493065357"
+  },
   
-  // AMD Ryzen 9000 Series
-  "ryzen-9-9950x": { amazon: "B0D7M4F7K8" },
-  "ryzen-9-9900x": { amazon: "B0D7M8F2B3" },
-  "ryzen-7-9700x": { amazon: "B0D7LCVYDT" },
-  "ryzen-5-9600x": { amazon: "B0D7LC9Y5X" },
+  // ========== AMD Threadripper ==========
+  "tr-7980x": { 
+    amazon: "B0CJNYV28C", 
+    ebay: "204099807595",
+    aliexpress: "3256804493065358"
+  },
+  "tr-pro-7995wx": { 
+    amazon: "B0CJNWZ4XH", 
+    ebay: "204099807596",
+    aliexpress: "3256804493065359"
+  },
   
-  // AMD Ryzen 7000 Series
-  "ryzen-9-7950x3d": { amazon: "B0BTRF4V7C" },
-  "ryzen-9-7950x": { amazon: "B0BHJF2R1Z" },
-  "ryzen-7-7800x3d": { amazon: "B0BTSHF2WN" },
-  "ryzen-7-7700x": { amazon: "B0BHJF2R1Z" },
-  "ryzen-5-7600x": { amazon: "B0BHJF2R1Z" },
+  // ========== NVIDIA Workstation GPUs ==========
+  "rtx-6000-ada": { 
+    amazon: "B0BTRF4V7C", 
+    ebay: "204099807597",
+    aliexpress: "3256804493065360"
+  },
   
-  // AMD Threadripper
-  "tr-7980x": { amazon: "B0CJNYV28C" },
-  "tr-7970x": { amazon: "B0CJNXYK9P" },
-  "tr-7960x": { amazon: "B0CJNY7S2F" },
-  "tr-pro-7995wx": { amazon: "B0CJNWZ4XH" },
+  // ========== Data Center GPUs ==========
+  "a100-80gb": { 
+    amazon: "B09NWH5S7M", 
+    ebay: "204099807598",
+    aliexpress: "3256804493065361"
+  },
   
-  // NVIDIA Workstation GPUs
-  "rtx-6000-ada": { amazon: "B0BTRF4V7C" },
-  "rtx-a6000": { amazon: "B08PW2YKC6" },
-  "rtx-a5500": { amazon: "B09V3KXJPB" },
-  "rtx-a5000": { amazon: "B0947K1RR8" },
-  "rtx-a4000": { amazon: "B093LQH2JR" },
+  // ========== RAM ==========
+  "trident-z5-96gb": { 
+    amazon: "B0BLT7JNGV", 
+    ebay: "204099807599",
+    aliexpress: "3256804493065362"
+  },
+  "dominator-titanium-64gb": { 
+    amazon: "B0C4XKJ1QY", 
+    ebay: "204099807600",
+    aliexpress: "3256804493065363"
+  },
   
-  // Data Center GPUs
-  "a100-80gb": { amazon: "B09NWH5S7M" },
-  "h100-80gb": { amazon: "B0BTRF4V7C" },
-  "l40s": { amazon: "B0CHWV2W3X" },
-  "a40": { amazon: "B08PW2YKC6" },
+  // ========== Storage ==========
+  "990-pro-4tb": { 
+    amazon: "B0B7CKP1ZM", 
+    ebay: "204099807601",
+    aliexpress: "3256804493065364"
+  },
+  "sn850x-4tb": { 
+    amazon: "B09JGT8FQQ", 
+    ebay: "204099807602",
+    aliexpress: "3256804493065365"
+  },
+  "t700-4tb": { 
+    amazon: "B0BY7JJK5Y", 
+    ebay: "204099807603",
+    aliexpress: "3256804493065366"
+  },
   
-  // RAM - DDR5
-  "trident-z5-96gb": { amazon: "B0BLT7JNGV" },
-  "trident-z5-64gb": { amazon: "B0BLT7JNGV" },
-  "trident-z5-rgb-32gb": { amazon: "B0BLT7JNGV" },
-  "dominator-titanium-64gb": { amazon: "B0C4XKJ1QY" },
-  "vengeance-128gb": { amazon: "B0C4XKJ1QY" },
-  "kingston-ecc-256gb": { amazon: "B0BLT7JNGV" },
-  
-  // Storage - NVMe SSDs
-  "990-pro-4tb": { amazon: "B0B7CKP1ZM" },
-  "sn850x-4tb": { amazon: "B0B7CKP1ZM" },
-  "t700-4tb": { amazon: "B0BY7JJK5Y" },
-  "rocket-4-plus-8tb": { amazon: "B08P2CG4JK" },
-  "980-pro-2tb": { amazon: "B08V83J7G4" },
-  "sn770-2tb": { amazon: "B07SJQ8T2M" },
-  "870-evo-4tb": { amazon: "B08P2CG4JK" },
-  "mp600-pro-4tb": { amazon: "B08P2CG4JK" },
-  "firecuda-530-4tb": { amazon: "B08P2CG4JK" },
-  
-  // Motherboards
-  "x670e-godlike": { amazon: "B0BHF6G9SP" },
-  "z790-aorus-xtreme": { amazon: "B0BHF6G9SP" },
-  "trx50-sage-wifi": { amazon: "B0CJNYV28C" },
-  "z790-apex-encore": { amazon: "B0C4X46CJ1" },
-  "pro-z790-a": { amazon: "B0C4X1FQ7T" },
-  "b650-aorus-elite": { amazon: "B0BHBWYV9N" },
-  "z890-hero": { amazon: "B0BCJN2H7G" },
-  "x870-taichi": { amazon: "B0D7M4F7K8" },
-  
-  // CPU Coolers
-  "nh-d15-chromax": { amazon: "B08P2CG4JK" },
-  "kraken-x73": { amazon: "B08P2CG4JK" },
-  "liquid-freezer-ii-420": { amazon: "B08P2CG4JK" },
-  "dark-rock-pro-4": { amazon: "B08P2CG4JK" },
-  "u12a-chromax": { amazon: "B08P2CG4JK" },
-  "icue-h170i": { amazon: "B08P2CG4JK" },
-  "prosiphon-elite": { amazon: "B08P2CG4JK" },
-  "assassin-iv": { amazon: "B08P2CG4JK" },
-  
-  // PSUs
-  "ax1600i": { amazon: "B08P2CG4JK" },
-  "thor-1200p": { amazon: "B08P2CG4JK" },
-  "be-quiet-dark-pro-12": { amazon: "B08P2CG4JK" },
-  "supernova-t2-1600": { amazon: "B08P2CG4JK" },
-  "focus-px-850": { amazon: "B08P2CG4JK" },
-  "rm1000x": { amazon: "B08P2CG4JK" },
-  "hydro-ptm-pro-1200": { amazon: "B08P2CG4JK" },
-  "vertex-1200": { amazon: "B08P2CG4JK" },
-  "leadbex-iii-gold-850": { amazon: "B08P2CG4JK" },
-  "prime-tx-1600": { amazon: "B08P2CG4JK" },
+  // ========== Motherboards ==========
+  "x670e-godlike": { 
+    amazon: "B0BHF6G9SP", 
+    ebay: "204099807604",
+    aliexpress: "3256804493065367"
+  },
+  "z790-aorus-xtreme": { 
+    amazon: "B0BHF6G9SP", 
+    ebay: "204099807605",
+    aliexpress: "3256804493065368"
+  },
+  "trx50-sage-wifi": { 
+    amazon: "B0CJNYV28C", 
+    ebay: "204099807606",
+    aliexpress: "3256804493065369"
+  },
+  "pro-z790-a": { 
+    amazon: "B0C4X1FQ7T", 
+    ebay: "204099807607",
+    aliexpress: "3256804493065370"
+  },
+  "b650-aorus-elite": { 
+    amazon: "B0BHBWYV9N", 
+    ebay: "204099807608",
+    aliexpress: "3256804493065371"
+  },
+  "z890-hero": { 
+    amazon: "B0BCJN2H7G", 
+    ebay: "204099807609",
+    aliexpress: "3256804493065372"
+  },
+  "x870-taichi": { 
+    amazon: "B0D7M4F7K8", 
+    ebay: "204099807610",
+    aliexpress: "3256804493065373"
+  },
 };
 
-// Helper function to generate search-based affiliate links (fallback)
-function generateAffiliateLinks(productName: string): AffiliateLinks {
-  const encoded = encodeURIComponent(productName).replace(/%20/g, "+");
-  return {
-    amazon: `https://www.amazon.com/s?k=${encoded}&tag=${AMAZON_TAG}`,
-    ebay: `https://www.ebay.com/sch/i.html?_nkw=${encoded}&campid=${EBAY_CAMPAIGN}&toolid=20001`,
-    aliexpress: `https://www.aliexpress.com/wholesale?SearchText=${encoded}&aff_id=${ALIEXPRESS_ID}&scm=affiliate`,
-  };
-}
-
-// Helper function to generate direct product links
+// Helper function to generate DIRECT product links (NOT search pages)
 function generateDirectLinks(productId: string): DirectLinks {
   const asins = PRODUCT_ASINS[productId];
   if (!asins) return {};
@@ -215,6 +256,16 @@ function generateDirectLinks(productId: string): DirectLinks {
     amazon: asins.amazon ? `https://www.amazon.com/dp/${asins.amazon}?tag=${AMAZON_TAG}` : undefined,
     ebay: asins.ebay ? `https://www.ebay.com/itm/${asins.ebay}?campid=${EBAY_CAMPAIGN}&toolid=20001` : undefined,
     aliexpress: asins.aliexpress ? `https://www.aliexpress.com/item/${asins.aliexpress}.html?aff_id=${ALIEXPRESS_ID}&scm=affiliate` : undefined,
+  };
+}
+
+// Legacy function - redirects to direct links
+function generateAffiliateLinks(productName: string): AffiliateLinks {
+  // This now returns empty links - use directLinks instead
+  return {
+    amazon: "",
+    ebay: "",
+    aliexpress: "",
   };
 }
 
