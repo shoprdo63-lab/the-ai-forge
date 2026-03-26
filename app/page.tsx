@@ -17,6 +17,7 @@ import HardwareCard from "@/components/HardwareCard";
 import { HardwareGridSkeleton } from "@/components/Skeletons";
 import Newsletter from "@/components/Newsletter";
 import ExitPopup from "@/components/ExitPopup";
+import Footer from "@/components/Footer";
 import Head from "next/head";
 
 // Dynamic imports for heavy components
@@ -452,10 +453,8 @@ export default function Home() {
       {/* Exit Intent Popup */}
       <ExitPopup />
 
-      {/* Footer */}
-      <footer className="mt-32 border-t border-white/[0.06] py-12 text-center">
-        <p className="text-sm text-zinc-600">© 2026 The AI Forge. Built to Global Standards.</p>
-      </footer>
+      {/* Modern Footer */}
+      <Footer />
     </div>
   );
 }
