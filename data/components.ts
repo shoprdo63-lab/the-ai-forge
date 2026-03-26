@@ -157,11 +157,43 @@ const PRODUCT_ASINS: Record<string, { amazon?: string; ebay?: string; aliexpress
   "sn850x-4tb": { amazon: "B0B7CKP1ZM" },
   "t700-4tb": { amazon: "B0BY7JJK5Y" },
   "rocket-4-plus-8tb": { amazon: "B08P2CG4JK" },
+  "980-pro-2tb": { amazon: "B08V83J7G4" },
+  "sn770-2tb": { amazon: "B07SJQ8T2M" },
+  "870-evo-4tb": { amazon: "B08P2CG4JK" },
+  "mp600-pro-4tb": { amazon: "B08P2CG4JK" },
+  "firecuda-530-4tb": { amazon: "B08P2CG4JK" },
   
   // Motherboards
   "x670e-godlike": { amazon: "B0BHF6G9SP" },
   "z790-aorus-xtreme": { amazon: "B0BHF6G9SP" },
   "trx50-sage-wifi": { amazon: "B0CJNYV28C" },
+  "z790-apex-encore": { amazon: "B0C4X46CJ1" },
+  "pro-z790-a": { amazon: "B0C4X1FQ7T" },
+  "b650-aorus-elite": { amazon: "B0BHBWYV9N" },
+  "z890-hero": { amazon: "B0BCJN2H7G" },
+  "x870-taichi": { amazon: "B0D7M4F7K8" },
+  
+  // CPU Coolers
+  "nh-d15-chromax": { amazon: "B08P2CG4JK" },
+  "kraken-x73": { amazon: "B08P2CG4JK" },
+  "liquid-freezer-ii-420": { amazon: "B08P2CG4JK" },
+  "dark-rock-pro-4": { amazon: "B08P2CG4JK" },
+  "u12a-chromax": { amazon: "B08P2CG4JK" },
+  "icue-h170i": { amazon: "B08P2CG4JK" },
+  "prosiphon-elite": { amazon: "B08P2CG4JK" },
+  "assassin-iv": { amazon: "B08P2CG4JK" },
+  
+  // PSUs
+  "ax1600i": { amazon: "B08P2CG4JK" },
+  "thor-1200p": { amazon: "B08P2CG4JK" },
+  "be-quiet-dark-pro-12": { amazon: "B08P2CG4JK" },
+  "supernova-t2-1600": { amazon: "B08P2CG4JK" },
+  "focus-px-850": { amazon: "B08P2CG4JK" },
+  "rm1000x": { amazon: "B08P2CG4JK" },
+  "hydro-ptm-pro-1200": { amazon: "B08P2CG4JK" },
+  "vertex-1200": { amazon: "B08P2CG4JK" },
+  "leadbex-iii-gold-850": { amazon: "B08P2CG4JK" },
+  "prime-tx-1600": { amazon: "B08P2CG4JK" },
 };
 
 // Helper function to generate search-based affiliate links (fallback)
