@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://dainty-llama-8bd1a5.netlify.app"),
   title: "The AI Forge | AI Hardware Database & Build Configurator",
   description: "Professional AI hardware database and build configurator for machine learning workstations",
   manifest: "/manifest.json",
@@ -34,6 +35,19 @@ export const metadata: Metadata = {
       { url: "/icons/icon-192x192.png", sizes: "192x192" },
       { url: "/icons/icon-512x512.png", sizes: "512x512" },
     ],
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://dainty-llama-8bd1a5.netlify.app",
+    siteName: "AI Forge",
+    title: "AI Forge | Hardware for AI Workloads",
+    description: "Curated hardware for LLM inference and model training",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AI Forge",
+    description: "Hardware for AI Workloads",
   },
 };
 
