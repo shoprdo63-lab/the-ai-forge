@@ -43,21 +43,18 @@ function calculateAITier(component: HardwareComponent): "S-Tier" | "A-Tier" | "B
   }
 }
 
-// Tier badge colors - Clean solid borders
+// Tier badge colors - Futuristic with glow
 const TIER_BADGES = {
   "S-Tier": {
-    border: "border-amber-500",
-    text: "text-amber-500",
+    class: "tier-s",
     label: "S",
   },
   "A-Tier": {
-    border: "border-emerald-500",
-    text: "text-emerald-500",
+    class: "tier-a",
     label: "A",
   },
   "B-Tier": {
-    border: "border-zinc-500",
-    text: "text-zinc-500",
+    class: "tier-b",
     label: "B",
   },
 };
@@ -171,9 +168,9 @@ export default function HardwareCard({
                   >
                     {component.category}
                   </span>
-                  {/* AI-Tier Badge - Clean */}
+                  {/* AI-Tier Badge - Futuristic */}
                   <span
-                    className={`inline-flex items-center justify-center w-6 h-6 rounded text-[10px] font-semibold border bg-transparent ${tierStyle.border} ${tierStyle.text}`}
+                    className={`tier-badge ${tierStyle.class}`}
                     title={`${aiTier} - ${isGPU ? `${vramNum}GB VRAM` : "Multi-core Performance"}`}
                   >
                     {tierStyle.label}

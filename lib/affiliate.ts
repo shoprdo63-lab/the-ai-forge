@@ -9,6 +9,70 @@ interface AffiliateConfig {
   trackingParam: string;
 }
 
+// Deep-link templates for specific product URLs
+const DEEP_LINK_TEMPLATES: Record<AffiliateProvider, string> = {
+  amazon: "https://www.amazon.com/dp/{productId}?tag={affiliateId}",
+  aliexpress: "https://www.aliexpress.com/item/{productId}.html?aff_id={affiliateId}&scm=affiliate",
+  ebay: "https://www.ebay.com/itm/{productId}?campid={affiliateId}&toolid=20001",
+};
+
+// Product ID mappings for popular hardware (ASINs, Item IDs)
+const PRODUCT_ID_MAP: Record<string, Record<AffiliateProvider, string | null>> = {
+  // NVIDIA RTX 4090
+  "rtx-4090": {
+    amazon: "B0GBR4BKMW",
+    aliexpress: "3256805527455487",
+    ebay: "204321598123",
+  },
+  "rtx-4080-super": {
+    amazon: "B0CQP4VK4P",
+    aliexpress: "3256805789123456",
+    ebay: "204567432109",
+  },
+  "rtx-4070-ti-super": {
+    amazon: "B0CQP7L8KH",
+    aliexpress: "3256805891234567",
+    ebay: "204678901234",
+  },
+  "rtx-4070": {
+    amazon: "B0CQP6MVRG",
+    aliexpress: "3256805123456789",
+    ebay: "204789012345",
+  },
+  // AMD GPUs
+  "rx-7900-xtx": {
+    amazon: "B0BNL9NPL9",
+    aliexpress: "3256805345678901",
+    ebay: "204890123456",
+  },
+  "rx-7900-xt": {
+    amazon: "B0BNL8Z8KH",
+    aliexpress: "3256805456789012",
+    ebay: "204901234567",
+  },
+  // CPUs
+  "i9-14900k": {
+    amazon: "B0BCJN2H7G",
+    aliexpress: "3256805567890123",
+    ebay: "205012345678",
+  },
+  "i7-14700k": {
+    amazon: "B0C4X1FQ7T",
+    aliexpress: "3256805678901234",
+    ebay: "205123456789",
+  },
+  "ryzen-9-7950x3d": {
+    amazon: "B0BTR5F56C",
+    aliexpress: "3256805789012345",
+    ebay: "205234567890",
+  },
+  "ryzen-7-7800x3d": {
+    amazon: "B0BTSHF2WN",
+    aliexpress: "3256805890123456",
+    ebay: "205345678901",
+  },
+};
+
 // Affiliate ID storage - The AI Forge credentials
 const affiliateIds: Record<AffiliateProvider, AffiliateConfig> = {
   amazon: {
@@ -272,6 +336,101 @@ export function generateAliExpressSearchLinks(componentNames: string[]): string[
   return componentNames.map(name => generateAliExpressSearchLink(name));
 }
 
+/**
+ * Generates a deep affiliate link for a specific product using the template system
+ * Uses product ASINs/IDs for direct linking instead of generic search
+ * @param productId - The product identifier (e.g., "rtx-4090")
+ * @param provider - The store provider (amazon, aliexpress, ebay)
+ * @returns Deep affiliate product URL, or search URL if product not mapped
+ * 
+ * @example
+ * const link = generateDeepProductLink("rtx-4090", "amazon");
+ * // Returns: "https://www.amazon.com/dp/B0GBR4BKMW?tag=aiforge-20"
+ */
+export function generateDeepProductLink(
+  productId: string,
+  provider: AffiliateProvider
+): string {
+  const affiliateId = affiliateIds[provider].id;
+  const productMapping = PRODUCT_ID_MAP[productId.toLowerCase()];
+  
+  if (!productMapping || !productMapping[provider]) {
+    // Fallback to search if no direct product mapping
+    console.warn(`No product ID mapping for ${productId} on ${provider}, falling back to search`);
+    return generateSearchLink(productId.replace(/-/g, " "), provider);
+  }
+  
+  const targetProductId = productMapping[provider];
+  const template = DEEP_LINK_TEMPLATES[provider];
+  
+  return template
+    .replace("{productId}", targetProductId)
+    .replace("{affiliateId}", affiliateId);
+}
+
+/**
+ * Generates all deep affiliate links for a product across all platforms
+ * @param productId - The product identifier (e.g., "rtx-4090")
+ * @returns Object with deep links for each provider
+ * 
+ * @example
+ * const links = generateAllDeepProductLinks("rtx-4090");
+ * // Returns: { amazon: "...", aliexpress: "...", ebay: "..." }
+ */
+export function generateAllDeepProductLinks(productId: string): {
+  amazon: string;
+  aliexpress: string;
+  ebay: string;
+} {
+  return {
+    amazon: generateDeepProductLink(productId, "amazon"),
+    aliexpress: generateDeepProductLink(productId, "aliexpress"),
+    ebay: generateDeepProductLink(productId, "ebay"),
+  };
+}
+
+/**
+ * Helper to generate search link for fallback
+ */
+function generateSearchLink(query: string, provider: AffiliateProvider): string {
+  switch (provider) {
+    case "amazon":
+      return generateAmazonSearchLink(query);
+    case "aliexpress":
+      return generateAliExpressSearchLink(query);
+    case "ebay":
+      return generateEbaySearchLink(query);
+    default:
+      return "";
+  }
+}
+
+/**
+ * Registers a new product ID mapping for deep-linking
+ * @param productId - The internal product identifier
+ * @param mappings - Object containing ASINs/IDs for each provider
+ * 
+ * @example
+ * registerProductMapping("rtx-5090", {
+ *   amazon: "B0NEWASIN",
+ *   aliexpress: "3256809999999999",
+ *   ebay: "209999999999"
+ * });
+ */
+export function registerProductMapping(
+  productId: string,
+  mappings: Partial<Record<AffiliateProvider, string>>
+): void {
+  const normalizedId = productId.toLowerCase();
+  if (!PRODUCT_ID_MAP[normalizedId]) {
+    PRODUCT_ID_MAP[normalizedId] = { amazon: null, aliexpress: null, ebay: null };
+  }
+  
+  Object.entries(mappings).forEach(([provider, id]) => {
+    PRODUCT_ID_MAP[normalizedId][provider as AffiliateProvider] = id;
+  });
+}
+
 // Example usage:
 // setAllAffiliateIds({
 //   amazon: "yourtag-20",
@@ -279,7 +438,8 @@ export function generateAliExpressSearchLinks(componentNames: string[]): string[
 //   ebay: "1234567890"
 // });
 // 
-// // In your component:
-// <a href={getAffiliateLink("https://amazon.com/dp/B08G5...", "amazon")}>Buy on Amazon</a>
-// <a href={getAffiliateLink("https://aliexpress.com/item/...", "aliexpress")}>Buy on AliExpress</a>
-// <a href={getAffiliateLink("https://ebay.com/itm/...", "ebay")}>Check eBay</a>
+// // Deep linking (preferred):
+// <a href={generateDeepProductLink("rtx-4090", "amazon")}>Buy on Amazon</a>
+// 
+// // Fallback search:
+// <a href={generateAmazonSearchLink("RTX 4090")}>Search Amazon</a>
