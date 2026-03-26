@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Newsreader, Inter } from "next/font/google";
 import "../globals.css";
+import BlogStyleProvider from "./BlogStyleProvider";
 
 // ============================================
 // Premium Typography: Newsreader for body, Inter for headers
@@ -111,17 +112,12 @@ export default function BlogLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className={`${newsreader.variable} ${inter.variable} font-sans`}>
-      {/* Font CSS Variables for Tailwind */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          :root {
-            --font-serif: ${newsreader.style.fontFamily};
-            --font-sans: ${inter.style.fontFamily};
-          }
-        `
-      }} />
+    <BlogStyleProvider 
+      fontVariables={`${newsreader.variable} ${inter.variable}`}
+      fontSerif={newsreader.style.fontFamily}
+      fontSans={inter.style.fontFamily}
+    >
       {children}
-    </div>
+    </BlogStyleProvider>
   );
 }
