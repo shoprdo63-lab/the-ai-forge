@@ -41,6 +41,12 @@ export interface AffiliateLinks {
   aliexpress: string;
 }
 
+export interface DirectLinks {
+  amazon?: string;
+  ebay?: string;
+  aliexpress?: string;
+}
+
 export interface HardwareComponent {
   id: string;
   name: string;
@@ -53,6 +59,7 @@ export interface HardwareComponent {
   tags: string[];
   aiScore: number;
   affiliateLinks: AffiliateLinks;
+  directLinks?: DirectLinks;
   inStock: boolean;
   releaseDate?: string;
   imageUrl?: string;
@@ -63,13 +70,49 @@ const AMAZON_TAG = "aiforge-20";
 const EBAY_CAMPAIGN = "5339146149";
 const ALIEXPRESS_ID = "528438";
 
-// Helper function to generate affiliate links
+// Product ASIN mappings for direct links
+const PRODUCT_ASINS: Record<string, { amazon?: string; ebay?: string; aliexpress?: string }> = {
+  // NVIDIA GPUs
+  "rtx-5090": { amazon: "B0GBR4BKMW" },
+  "rtx-4090": { amazon: "B0GBR4BKMW" },
+  "rtx-4080-super": { amazon: "B0CQP4VK4P" },
+  "rtx-4070-ti-super": { amazon: "B0CQP7L8KH" },
+  "rtx-3090-ti": { amazon: "B09V3KXJPB" },
+  "rtx-4060-ti-16gb": { amazon: "B0C4X6ZXBB" },
+  "rtx-6000-ada": { amazon: "B0BTRF4V7C" },
+  // AMD GPUs
+  "rx-7900-xtx": { amazon: "B0BNL9NPL9" },
+  "rx-7900-xt": { amazon: "B0BNL8Z8KH" },
+  "rx-7800-xt": { amazon: "B0CHWV2W3X" },
+  // Intel CPUs
+  "core-i9-14900k": { amazon: "B0BCJN2H7G" },
+  "core-i7-14700k": { amazon: "B0C4X1FQ7T" },
+  "core-i5-14600k": { amazon: "B0C4X46CJ1" },
+  // AMD CPUs
+  "ryzen-9-9950x": { amazon: "B0D7M4F7K8" },
+  "ryzen-7-7800x3d": { amazon: "B0BTSHF2WN" },
+  "tr-7980x": { amazon: "B0CJNYV28C" },
+};
+
+// Helper function to generate search-based affiliate links (fallback)
 function generateAffiliateLinks(productName: string): AffiliateLinks {
   const encoded = encodeURIComponent(productName).replace(/%20/g, "+");
   return {
     amazon: `https://www.amazon.com/s?k=${encoded}&tag=${AMAZON_TAG}`,
     ebay: `https://www.ebay.com/sch/i.html?_nkw=${encoded}&campid=${EBAY_CAMPAIGN}&toolid=20001`,
     aliexpress: `https://www.aliexpress.com/wholesale?SearchText=${encoded}&aff_id=${ALIEXPRESS_ID}&scm=affiliate`,
+  };
+}
+
+// Helper function to generate direct product links
+function generateDirectLinks(productId: string): DirectLinks {
+  const asins = PRODUCT_ASINS[productId];
+  if (!asins) return {};
+  
+  return {
+    amazon: asins.amazon ? `https://www.amazon.com/dp/${asins.amazon}?tag=${AMAZON_TAG}` : undefined,
+    ebay: asins.ebay ? `https://www.ebay.com/itm/${asins.ebay}?campid=${EBAY_CAMPAIGN}&toolid=20001` : undefined,
+    aliexpress: asins.aliexpress ? `https://www.aliexpress.com/item/${asins.aliexpress}.html?aff_id=${ALIEXPRESS_ID}&scm=affiliate` : undefined,
   };
 }
 
@@ -132,6 +175,7 @@ const GPUs: HardwareComponent[] = [
     tags: ["Flagship", "32GB", "AI Training"],
     aiScore: 100,
     affiliateLinks: generateAffiliateLinks("NVIDIA GeForce RTX 5090"),
+    directLinks: generateDirectLinks("rtx-5090"),
     inStock: false,
     releaseDate: "2025-03",
   },
@@ -155,6 +199,7 @@ const GPUs: HardwareComponent[] = [
     tags: ["Flagship", "24GB", "Popular"],
     aiScore: 95,
     affiliateLinks: generateAffiliateLinks("NVIDIA GeForce RTX 4090"),
+    directLinks: generateDirectLinks("rtx-4090"),
     inStock: true,
   },
   {
@@ -177,6 +222,7 @@ const GPUs: HardwareComponent[] = [
     tags: ["Prosumer", "16GB", "Inference"],
     aiScore: 82,
     affiliateLinks: generateAffiliateLinks("NVIDIA GeForce RTX 4080 SUPER"),
+    directLinks: generateDirectLinks("rtx-4080-super"),
     inStock: true,
   },
   {
@@ -199,6 +245,7 @@ const GPUs: HardwareComponent[] = [
     tags: ["Enthusiast", "16GB", "Value"],
     aiScore: 75,
     affiliateLinks: generateAffiliateLinks("NVIDIA GeForce RTX 4070 Ti SUPER"),
+    directLinks: generateDirectLinks("rtx-4070-ti-super"),
     inStock: true,
   },
   {
@@ -221,6 +268,7 @@ const GPUs: HardwareComponent[] = [
     tags: ["Used Market", "24GB", "NVLink"],
     aiScore: 70,
     affiliateLinks: generateAffiliateLinks("NVIDIA GeForce RTX 3090 Ti"),
+    directLinks: generateDirectLinks("rtx-3090-ti"),
     inStock: true,
   },
   {
@@ -243,6 +291,7 @@ const GPUs: HardwareComponent[] = [
     tags: ["Entry", "16GB", "Efficient"],
     aiScore: 60,
     affiliateLinks: generateAffiliateLinks("NVIDIA GeForce RTX 4060 Ti 16GB"),
+    directLinks: generateDirectLinks("rtx-4060-ti-16gb"),
     inStock: true,
   },
   {
@@ -265,6 +314,7 @@ const GPUs: HardwareComponent[] = [
     tags: ["Workstation", "48GB", "ECC"],
     aiScore: 98,
     affiliateLinks: generateAffiliateLinks("NVIDIA RTX 6000 Ada Generation"),
+    directLinks: generateDirectLinks("rtx-6000-ada"),
     inStock: true,
   },
   {
@@ -353,6 +403,7 @@ const GPUs: HardwareComponent[] = [
     tags: ["AMD", "ROCm", "24GB"],
     aiScore: 78,
     affiliateLinks: generateAffiliateLinks("AMD Radeon RX 7900 XTX"),
+    directLinks: generateDirectLinks("rx-7900-xtx"),
     inStock: true,
   },
   {
@@ -375,6 +426,7 @@ const GPUs: HardwareComponent[] = [
     tags: ["AMD", "ROCm", "20GB"],
     aiScore: 72,
     affiliateLinks: generateAffiliateLinks("AMD Radeon RX 7900 XT"),
+    directLinks: generateDirectLinks("rx-7900-xt"),
     inStock: true,
   },
   {
@@ -397,6 +449,7 @@ const GPUs: HardwareComponent[] = [
     tags: ["AMD", "ROCm", "16GB"],
     aiScore: 65,
     affiliateLinks: generateAffiliateLinks("AMD Radeon RX 7800 XT"),
+    directLinks: generateDirectLinks("rx-7800-xt"),
     inStock: true,
   },
   {
@@ -494,6 +547,7 @@ const CPUs: HardwareComponent[] = [
     tags: ["Enthusiast", "64-Core", "HEDT"],
     aiScore: 92,
     affiliateLinks: generateAffiliateLinks("AMD Ryzen Threadripper 7980X"),
+    directLinks: generateDirectLinks("tr-7980x"),
     inStock: true,
   },
   {
@@ -517,6 +571,7 @@ const CPUs: HardwareComponent[] = [
     tags: ["Gaming", "16-Core", "Zen 5"],
     aiScore: 85,
     affiliateLinks: generateAffiliateLinks("AMD Ryzen 9 9950X"),
+    directLinks: generateDirectLinks("ryzen-9-9950x"),
     inStock: true,
   },
   {
@@ -563,6 +618,7 @@ const CPUs: HardwareComponent[] = [
     tags: ["Gaming", "High Frequency", "Desktop"],
     aiScore: 80,
     affiliateLinks: generateAffiliateLinks("Intel Core i9-14900K"),
+    directLinks: generateDirectLinks("core-i9-14900k"),
     inStock: true,
   },
   {
@@ -586,6 +642,7 @@ const CPUs: HardwareComponent[] = [
     tags: ["Gaming", "3D V-Cache", "Efficient"],
     aiScore: 72,
     affiliateLinks: generateAffiliateLinks("AMD Ryzen 7 7800X3D"),
+    directLinks: generateDirectLinks("ryzen-7-7800x3d"),
     inStock: true,
   },
   {
@@ -609,6 +666,7 @@ const CPUs: HardwareComponent[] = [
     tags: ["Desktop", "Balanced", "Performance"],
     aiScore: 75,
     affiliateLinks: generateAffiliateLinks("Intel Core i7-14700K"),
+    directLinks: generateDirectLinks("core-i7-14700k"),
     inStock: true,
   },
   {
@@ -655,6 +713,7 @@ const CPUs: HardwareComponent[] = [
     tags: ["Value", "Entry", "LGA1700"],
     aiScore: 65,
     affiliateLinks: generateAffiliateLinks("Intel Core i5-14600K"),
+    directLinks: generateDirectLinks("core-i5-14600k"),
     inStock: true,
   },
   {

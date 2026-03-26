@@ -332,7 +332,7 @@ export default function HardwareDashboardClient({
             )}
           </motion.div>
 
-          {/* Purchase Options */}
+          {/* Purchase Options - PCPartPicker Style */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -343,44 +343,46 @@ export default function HardwareDashboardClient({
               <div className="icon-geometric w-10 h-10">
                 <ShoppingCart className="w-5 h-5" />
               </div>
-              Purchase Options
+              Buy Now
             </h3>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
+              {/* Amazon - Primary CTA */}
               <a
-                href={affiliateLinks.amazon}
+                href={component.directLinks?.amazon || affiliateLinks.amazon}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-premium w-full flex items-center justify-center gap-3"
+                className="w-full flex items-center justify-center gap-3 bg-[#ff9900] hover:bg-[#ff8800] text-white font-semibold py-3 px-4 rounded-lg transition-all"
               >
                 <ShoppingCart className="w-5 h-5" />
-                <span>Buy on Amazon</span>
+                <span>View Deal on Amazon</span>
                 <ExternalLink className="w-4 h-4" />
               </a>
 
+              {/* Secondary Stores */}
               <div className="grid grid-cols-2 gap-3">
                 <a
-                  href={affiliateLinks.ebay}
+                  href={component.directLinks?.ebay || affiliateLinks.ebay}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-ghost flex items-center justify-center gap-2"
+                  className="flex items-center justify-center gap-2 bg-[#e53238] hover:bg-[#d4202a] text-white font-medium py-2.5 px-4 rounded-lg transition-all"
                 >
                   <span>eBay</span>
                   <ExternalLink className="w-4 h-4" />
                 </a>
                 <a
-                  href={affiliateLinks.aliexpress}
+                  href={component.directLinks?.aliexpress || affiliateLinks.aliexpress}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-ghost flex items-center justify-center gap-2"
+                  className="flex items-center justify-center gap-2 bg-[#ff4747] hover:bg-[#ff3333] text-white font-medium py-2.5 px-4 rounded-lg transition-all"
                 >
                   <span>AliExpress</span>
                   <ExternalLink className="w-4 h-4" />
                 </a>
               </div>
 
-              <p className="text-[10px] text-zinc-600 text-center font-mono uppercase tracking-wider mt-4">
-                Affiliate Links • Commission Earned
+              <p className="text-[10px] text-zinc-500 text-center font-mono uppercase tracking-wider mt-4">
+                {component.directLinks?.amazon ? "Direct Product Link • " : ""}Affiliate Links • Commission Earned
               </p>
             </div>
           </motion.div>

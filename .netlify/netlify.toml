@@ -1,5 +1,8 @@
-redirectsOrigin = "config"
-headers = []
+redirectsOrigin = "inline"
+headersOrigin = "inline"
+
+[images]
+remote_images = ["^(?:https:\\/\\/assets\\.nvidia\\.com\\/assets(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$", "^(?:https:\\/\\/www\\.nvidia\\.com\\/content(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$", "^(?:https:\\/\\/www\\.amd\\.com\\/system\\/files(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$", "^(?:https:\\/\\/www\\.intel\\.com\\/content(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$", "^(?:https:\\/\\/dlcdnwebimgs\\.asus\\.com(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$", "^(?:https:\\/\\/storage-asset\\.msi\\.com(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$", "^(?:https:\\/\\/www\\.gigabyte\\.com(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$", "^(?:https:\\/\\/www\\.supermicro\\.com(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$", "^(?:https:\\/\\/cwsmkt\\.corsair\\.com(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$", "^(?:https:\\/\\/www\\.gskill\\.com(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$", "^(?:https:\\/\\/www\\.kingston\\.com(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$", "^(?:https:\\/\\/www\\.crucial\\.com(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$", "^(?:https:\\/\\/images\\.samsung\\.com(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$", "^(?:https:\\/\\/noctua\\.at(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$", "^(?:https:\\/\\/www\\.arctic\\.de(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$", "^(?:https:\\/\\/www\\.teamgroupinc\\.com(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$", "^(?:https:\\/\\/placehold\\.co(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$", "^(?:https:\\/\\/images\\.unsplash\\.com(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$"]
 
 [functions]
 
@@ -32,6 +35,12 @@ NODE_VERSION = "20"
 
 [build.services]
 
+[[headers]]
+for = "/_next/static/*"
+
+[headers.values]
+Cache-Control = "public, max-age=31536000, immutable"
+
 [[redirects]]
 from = "/*"
 to = "/index.html"
@@ -39,6 +48,36 @@ status = 200.0
 force = false
 
 [redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/_next/image/"
+to = "/.netlify/images?url=:url&w=:width&q=:quality"
+status = 200.0
+force = false
+
+[redirects.query]
+url = ":url"
+w = ":width"
+q = ":quality"
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/_ipx/*"
+to = "/.netlify/images?url=:url&w=:width&q=:quality"
+status = 200.0
+force = false
+
+[redirects.query]
+url = ":url"
+w = ":width"
+q = ":quality"
 
 [redirects.conditions]
 

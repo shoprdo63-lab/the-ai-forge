@@ -24,6 +24,12 @@ export interface AffiliateLinks {
   aliexpress: string;
 }
 
+export interface DirectLinks {
+  amazon?: string;
+  ebay?: string;
+  aliexpress?: string;
+}
+
 export interface UserReview {
   id: string;
   username: string;
@@ -55,6 +61,7 @@ export interface HardwareComponent {
   aiScore: number;
   aiIntelligence: AIIntelligence;
   affiliateLinks: AffiliateLinks;
+  directLinks?: DirectLinks;
   inStock: boolean;
   releaseDate?: string;
   imageUrl?: string;
