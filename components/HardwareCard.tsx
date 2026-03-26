@@ -43,24 +43,21 @@ function calculateAITier(component: HardwareComponent): "S-Tier" | "A-Tier" | "B
   }
 }
 
-// Tier badge colors - Quiet Luxury muted palette
+// Tier badge colors - Clean solid borders
 const TIER_BADGES = {
   "S-Tier": {
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/30",
-    text: "text-amber-400",
+    border: "border-amber-500",
+    text: "text-amber-500",
     label: "S",
   },
   "A-Tier": {
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/30",
-    text: "text-emerald-400",
+    border: "border-emerald-500",
+    text: "text-emerald-500",
     label: "A",
   },
   "B-Tier": {
-    bg: "bg-zinc-500/10",
-    border: "border-zinc-500/30",
-    text: "text-zinc-400",
+    border: "border-zinc-500",
+    text: "text-zinc-500",
     label: "B",
   },
 };
@@ -166,17 +163,17 @@ export default function HardwareCard({
                 {/* Category & AI Tier Badges */}
                 <div className="flex items-center gap-2 mb-3">
                   <span
-                    className={`inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-medium uppercase tracking-wide border ${
+                    className={`inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-medium uppercase tracking-wide border bg-transparent ${
                       isGPU
-                        ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
-                        : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                        ? "text-blue-500 border-blue-500"
+                        : "text-amber-500 border-amber-500"
                     }`}
                   >
                     {component.category}
                   </span>
-                  {/* AI-Tier Badge - Quiet Luxury */}
+                  {/* AI-Tier Badge - Clean */}
                   <span
-                    className={`inline-flex items-center justify-center w-6 h-6 rounded text-[10px] font-semibold border ${tierStyle.bg} ${tierStyle.border} ${tierStyle.text}`}
+                    className={`inline-flex items-center justify-center w-6 h-6 rounded text-[10px] font-semibold border bg-transparent ${tierStyle.border} ${tierStyle.text}`}
                     title={`${aiTier} - ${isGPU ? `${vramNum}GB VRAM` : "Multi-core Performance"}`}
                   >
                     {tierStyle.label}

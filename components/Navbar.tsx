@@ -9,15 +9,15 @@ export default function Navbar() {
   return (
     <>
       <ScrollProgressBar />
-      <nav className="sticky top-0 left-0 right-0 z-50 navbar-glass transition-colors duration-500">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="sticky top-0 left-0 right-0 z-50 navbar">
+        <div className="max-w-[1800px] mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20 group-hover:border-emerald-500/40 transition-colors">
-                <Cpu className="w-5 h-5 text-emerald-500" />
+            <Link href="/" className="flex items-center gap-3">
+              <div className="p-2 bg-[var(--card-bg)] border border-[var(--border)] rounded-lg">
+                <Cpu className="w-5 h-5 text-[var(--accent)]" strokeWidth={1.5} />
               </div>
-              <span className="text-lg font-bold text-[var(--text-primary)] group-hover:text-emerald-500 transition-colors">
+              <span className="text-lg font-semibold text-[var(--text-primary)]">
                 AI Forge
               </span>
             </Link>
@@ -26,23 +26,23 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-1">
               <Link
                 href="/components"
-                className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--card-bg)] rounded-lg transition-all"
+                className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--card-bg)] rounded-md transition-colors"
               >
-                <Database className="w-4 h-4" />
+                <Database className="w-4 h-4" strokeWidth={1.5} />
                 Database
               </Link>
               <Link
                 href="/blog"
-                className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--card-bg)] rounded-lg transition-all"
+                className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--card-bg)] rounded-md transition-colors"
               >
-                <BookOpen className="w-4 h-4" />
+                <BookOpen className="w-4 h-4" strokeWidth={1.5} />
                 Guides
               </Link>
               <Link
                 href="/builder"
-                className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--card-bg)] rounded-lg transition-all"
+                className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--card-bg)] rounded-md transition-colors"
               >
-                <Wrench className="w-4 h-4" />
+                <Wrench className="w-4 h-4" strokeWidth={1.5} />
                 Build Configurator
               </Link>
             </div>
