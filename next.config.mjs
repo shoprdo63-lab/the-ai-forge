@@ -10,13 +10,6 @@ const nextConfig = {
   // Core Next.js 16 Configuration
   // ============================================
   
-  // Turbopack for ultra-fast builds
-  turbo: {
-    rules: {
-      '*.mdx': ['mdx-loader'],
-    },
-  },
-  
   // Page extensions for MDX support
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
   
@@ -118,21 +111,10 @@ const nextConfig = {
   compress: true,
   productionBrowserSourceMaps: false,
   
-  optimizePackageImports: [
-    'lucide-react',
-    '@radix-ui/react-icons',
-    'recharts',
-    'framer-motion',
-  ],
-  
   experimental: {
     mdxRs: true,
     optimizeCss: true,
-    turbo: {
-      treeShaking: true,
-    },
-    ppr: 'incremental',
-    reactCompiler: true,
+    cacheComponents: true,
     serverActions: {
       bodySizeLimit: '2mb',
     },
@@ -254,10 +236,6 @@ const nextConfig = {
   
   typescript: {
     ignoreBuildErrors: process.env.NODE_ENV === 'production',
-  },
-  
-  eslint: {
-    ignoreDuringBuilds: true,
   },
 };
 
