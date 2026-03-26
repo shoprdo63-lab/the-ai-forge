@@ -1,6 +1,6 @@
-import withBundleAnalyzerPkg from '@next/bundle-analyzer';
+import withBundleAnalyzer from '@next/bundle-analyzer';
 
-const withBundleAnalyzer = withBundleAnalyzerPkg({
+const withBundleAnalyzerConfig = withBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
@@ -262,9 +262,8 @@ const nextConfig = {
 };
 
 // Bundle analyzer configuration
-const withBundleAnalyzerConfig = withBundleAnalyzer({
+const bundleAnalyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
-  openAnalyzer: false,
 });
 
-export default withBundleAnalyzerConfig(nextConfig);
+export default bundleAnalyzer(nextConfig);
