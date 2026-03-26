@@ -113,12 +113,14 @@ export default function BlogLayout({
   return (
     <div className={`${newsreader.variable} ${inter.variable} font-sans`}>
       {/* Font CSS Variables for Tailwind */}
-      <style jsx global>{`
-        :root {
-          --font-serif: ${newsreader.style.fontFamily};
-          --font-sans: ${inter.style.fontFamily};
-        }
-      `}</style>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          :root {
+            --font-serif: ${newsreader.style.fontFamily};
+            --font-sans: ${inter.style.fontFamily};
+          }
+        `
+      }} />
       {children}
     </div>
   );

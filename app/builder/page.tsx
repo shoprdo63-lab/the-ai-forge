@@ -1,7 +1,6 @@
 "use client";
 
 export const dynamic = 'force-static';
-export const revalidate = 3600;
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";

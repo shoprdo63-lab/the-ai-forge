@@ -18,6 +18,7 @@ const nextConfig = {
   // ============================================
   
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -111,9 +112,11 @@ const nextConfig = {
   compress: true,
   productionBrowserSourceMaps: false,
   
+  // Use webpack instead of Turbopack (custom webpack config present)
+  turbopack: {},
+  
   experimental: {
     mdxRs: true,
-    optimizeCss: true,
     serverActions: {
       bodySizeLimit: '2mb',
     },
@@ -126,77 +129,6 @@ const nextConfig = {
   output: 'export',
   distDir: 'dist',
   trailingSlash: true,
-  
-  // ============================================
-  // Redirects
-  // ============================================
-  
-  async redirects() {
-    return [
-      {
-        source: '/blog/post/:slug',
-        destination: '/blog/:slug/',
-        permanent: true,
-      },
-      {
-        source: '/:path*',
-        has: [
-          {
-            type: 'host',
-            value: 'www.theaiforge.ai',
-          },
-        ],
-        destination: 'https://theaiforge.ai/:path*',
-        permanent: true,
-      },
-    ];
-  },
-  
-  // ============================================
-  // Custom Headers
-  // ============================================
-  
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-        ],
-      },
-      {
-        source: '/_next/static/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-      {
-        source: '/images/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=86400, stale-while-revalidate=604800',
-          },
-        ],
-      },
-    ];
-  },
-  
-  // ============================================
-  // Turbopack Configuration
-  // ============================================
-  
-  turbopack: {},
   
   // ============================================
   // Webpack Configuration

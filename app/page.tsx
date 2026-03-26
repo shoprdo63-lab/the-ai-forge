@@ -5,7 +5,6 @@
 // Static Generation with ISR for data freshness
 // ============================================
 export const dynamic = 'force-static';
-export const revalidate = 3600; // Revalidate every hour
 
 import { useState, useMemo, Suspense, lazy } from "react";
 import { motion, AnimatePresence } from "framer-motion";
