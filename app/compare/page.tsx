@@ -2,41 +2,52 @@
 
 // ============================================
 // Route Segment Config
-// Dynamic rendering for URL-driven state
 // ============================================
 export const dynamic = 'force-dynamic';
 
 import { useState, useMemo, Suspense, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import { 
   Cpu, 
   Plus, 
   X, 
   Search, 
   ArrowLeft, 
-  Zap, 
-  TrendingUp,
+  Zap,
   Award,
   ChevronRight,
   Crown,
-  Sparkles,
   BarChart3,
   Share2,
-  Download
+  Download,
+  Monitor
 } from "lucide-react";
-import { products, Product, getProductById } from "@/lib/products";
-import { ComparisonTable } from "@/components/compare/ComparisonTable";
-import { AIRadarChart } from "@/components/compare/AIRadarChart";
-import { HardwareSilhouette } from "@/components/compare/HardwareSilhouette";
-import { EnterpriseScaleWarning } from "@/components/enterprise/EnterpriseScaleWarning";
+import { hardwareComponents, type HardwareComponent } from "@/data/components";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toPng } from "html-to-image";
 
 // ============================================
-// Product Slot Component (Glassmorphism)
+// MERCHANT CONFIG
 // ============================================
+const MERCHANTS = [
+  { id: "amazon", name: "Amazon", color: "#ff9900", logo: "🛒" },
+  { id: "newegg", name: "Newegg", color: "#f2711c", logo: "🥚" },
+  { id: "bh", name: "B&H", color: "#c41230", logo: "📷" },
+];
 
+// ============================================
+// Hardware Icon Component
+// ============================================
+function HardwareIcon({ category, className }: { category: string; className?: string }) {
+  if (category === "GPU") return <Monitor className={className} />;
+  if (category === "CPU") return <Cpu className={className} />;
+  return <Zap className={className} />;
+}
+
+// ============================================
+// Product Slot Component
+// ============================================
 function ProductSlot({
   slot,
   product,
@@ -45,43 +56,36 @@ function ProductSlot({
   isWinner,
 }: {
   slot: number;
-  product: Product | null;
+  product: HardwareComponent | null;
   onSelect: (slot: number) => void;
   onRemove: (slot: number) => void;
   isWinner?: boolean;
 }) {
   if (!product) {
     return (
-      <motion.button
+      <button
         onClick={() => onSelect(slot)}
-        className="group relative w-full h-full min-h-[200px] rounded-2xl bg-white/[0.02] backdrop-blur-sm border border-white/10 hover:border-emerald-500/30 transition-all duration-300 flex flex-col items-center justify-center gap-4"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        className="group w-full h-full min-h-[180px] rounded-lg bg-white border border-[#d1d5db] hover:border-[#4f46e5] transition-colors flex flex-col items-center justify-center gap-3"
       >
-        <div className="w-16 h-16 rounded-full bg-white/[0.03] border border-white/10 flex items-center justify-center group-hover:bg-emerald-500/10 group-hover:border-emerald-500/30 transition-all">
-          <Plus className="w-8 h-8 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
+        <div className="w-12 h-12 rounded-full bg-[#f3f4f6] border border-[#e5e7eb] flex items-center justify-center group-hover:bg-[#f5f3ff] group-hover:border-[#4f46e5]/30 transition-colors">
+          <Plus className="w-6 h-6 text-[#9ca3af] group-hover:text-[#4f46e5] transition-colors" />
         </div>
-        <span className="text-sm text-zinc-500 group-hover:text-zinc-300 transition-colors">
+        <span className="text-sm text-[#6b7280] group-hover:text-[#374151] transition-colors">
           Add Product {slot}
         </span>
-      </motion.button>
+      </button>
     );
   }
 
   return (
-    <motion.div
-      className={`relative w-full rounded-2xl overflow-hidden transition-all duration-300 ${
-        isWinner
-          ? "bg-emerald-500/[0.08] border-2 border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.15)]"
-          : "bg-white/[0.03] backdrop-blur-md border border-white/10"
-      }`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-    >
+    <div className={`relative w-full rounded-lg overflow-hidden border transition-all ${
+      isWinner
+        ? "bg-[#f0fdf4] border-[#16a34a] shadow-sm"
+        : "bg-white border-[#d1d5db]"
+    }`}>
       {/* Winner Badge */}
       {isWinner && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3 py-1 bg-emerald-500 text-slate-950 text-xs font-bold rounded-full z-10">
+        <div className="absolute -top-1 left-1/2 -translate-x-1/2 flex items-center gap-1 px-2 py-0.5 bg-[#16a34a] text-white text-xs font-bold rounded-full z-10">
           <Crown className="w-3 h-3" />
           Winner
         </div>
@@ -90,43 +94,40 @@ function ProductSlot({
       {/* Remove Button */}
       <button
         onClick={() => onRemove(slot)}
-        className="absolute top-3 right-3 p-1.5 rounded-full bg-white/[0.05] hover:bg-red-500/20 text-zinc-400 hover:text-red-400 transition-all z-10"
+        className="absolute top-2 right-2 p-1 rounded bg-[#f3f4f6] hover:bg-red-100 text-[#9ca3af] hover:text-red-500 transition-colors z-10"
       >
-        <X className="w-4 h-4" />
+        <X className="w-3 h-3" />
       </button>
 
       {/* Product Content */}
-      <div className="p-6">
-        <span className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium uppercase tracking-wider bg-white/[0.05] text-zinc-400 rounded mb-3">
+      <div className="p-4">
+        <span className="inline-block px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider bg-[#f3f4f6] text-[#6b7280] rounded mb-2">
           {product.category}
         </span>
 
-        <div className="flex justify-center mb-4">
-          <HardwareSilhouette 
-            category={product.category} 
-            className="w-24 h-24 text-zinc-600" 
-          />
+        <div className="flex justify-center mb-3">
+          <div className="w-16 h-16 bg-[#f3f4f6] rounded-lg flex items-center justify-center">
+            <HardwareIcon category={product.category} className="w-8 h-8 text-[#9ca3af]" />
+          </div>
         </div>
 
-        <h3 className="font-sans text-lg font-semibold text-white text-center mb-1 line-clamp-2">
+        <h3 className="text-sm font-semibold text-[#374151] text-center mb-1 line-clamp-2">
           {product.name}
         </h3>
 
-        <p className="text-sm text-zinc-500 text-center mb-4">{product.brand}</p>
+        <p className="text-xs text-[#6b7280] text-center mb-3">{product.brand}</p>
 
-        <div className="flex items-center justify-center gap-4">
-          <span className="text-2xl font-bold text-emerald-400">
+        <div className="flex items-center justify-center gap-3">
+          <span className="text-lg font-bold text-[#0d9488]">
             ${product.price.toLocaleString()}
           </span>
-          {product.aiScore && (
-            <span className="flex items-center gap-1 text-xs text-zinc-400">
-              <Award className="w-3 h-3 text-emerald-500" />
-              AI: {product.aiScore}
-            </span>
-          )}
+          <span className="flex items-center gap-1 text-xs text-[#6b7280]">
+            <Award className="w-3 h-3 text-[#f59e0b]" />
+            AI: {product.aiScore}
+          </span>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 

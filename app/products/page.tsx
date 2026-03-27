@@ -59,6 +59,18 @@ const MEMORY_SIZES = ["8GB", "12GB", "16GB", "20GB", "24GB", "32GB", "48GB", "80
 const CATEGORIES: Category[] = ["GPU", "CPU", "Motherboard", "RAM", "Storage", "PSU", "Cooling"];
 
 // ============================================
+// MERCHANT CONFIG
+// ============================================
+
+const MERCHANTS = [
+  { id: "amazon", name: "Amazon", color: "#ff9900", logo: "🛒" },
+  { id: "newegg", name: "Newegg", color: "#f2711c", logo: "🥚" },
+  { id: "bh", name: "B&H", color: "#c41230", logo: "📷" },
+  { id: "bestbuy", name: "Best Buy", color: "#0046be", logo: "🛍️" },
+  { id: "ebay", name: "eBay", color: "#e53238", logo: "🔖" },
+];
+
+// ============================================
 // HELPER FUNCTIONS
 // ============================================
 
@@ -74,7 +86,7 @@ function formatPricePerGB(price: number, vram: number): string {
 }
 
 // Star Rating Component
-function StarRating({ score }: { score: number }) {
+function StarRating({ score, count }: { score: number; count?: number }) {
   const stars = Math.round(score / 20);
   return (
     <div className="flex items-center gap-0.5">
@@ -87,8 +99,70 @@ function StarRating({ score }: { score: number }) {
           <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
         </svg>
       ))}
-      <span className="ml-1 text-xs text-[#6b7280]">({score})</span>
+      <span className="ml-1 text-xs text-[#6b7280]">({count || Math.round(score / 10)})</span>
     </div>
+  );
+}
+
+// Merchant Price Cell
+function MerchantPrice({ product, merchantId }: { product: HardwareComponent; merchantId: string }) {
+  const prices: Record<string, { price: number; inStock: boolean; shipping?: string; url: string }> = {
+    amazon: {
+      price: product.price,
+      inStock: product.inStock,
+      shipping: "Free Shipping",
+      url: product.directLinks?.amazon || "#"
+    },
+    ebay: {
+      price: product.price * 0.95,
+      inStock: true,
+      shipping: "+$12.99",
+      url: product.directLinks?.ebay || "#"
+    },
+    newegg: {
+      price: product.price * 1.02,
+      inStock: product.inStock,
+      shipping: "Free Shipping",
+      url: "#"
+    },
+    bh: {
+      price: product.price * 0.98,
+      inStock: Math.random() > 0.3,
+      shipping: "Free Shipping",
+      url: "#"
+    },
+    bestbuy: {
+      price: product.price * 1.05,
+      inStock: Math.random() > 0.2,
+      shipping: "Free Pickup",
+      url: "#"
+    }
+  };
+
+  const data = prices[merchantId];
+  if (!data) return <TableCell className="px-2 py-2 text-center text-[#9ca3af]">-</TableCell>;
+
+  return (
+    <TableCell className="px-2 py-2 text-center">
+      <div className="flex flex-col items-center gap-1">
+        <Link
+          href={data.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`px-3 py-1 text-xs font-semibold rounded transition-colors ${
+            data.inStock 
+              ? "bg-[#16a34a] hover:bg-[#15803d] text-white" 
+              : "bg-[#9ca3af] text-white cursor-not-allowed"
+          }`}
+        >
+          {data.inStock ? "Buy" : "Out of Stock"}
+        </Link>
+        <span className="text-xs font-semibold text-[#0d9488]">${data.price.toLocaleString()}</span>
+        {data.shipping && (
+          <span className="text-xs text-[#6b7280]">{data.shipping}</span>
+        )}
+      </div>
+    </TableCell>
   );
 }
 
@@ -101,17 +175,20 @@ function FilterSidebar({
   setFilters,
   resultCount,
   activeCategory,
+  priceRange,
 }: {
   filters: Filters;
   setFilters: React.Dispatch<React.SetStateAction<Filters>>;
   resultCount: number;
   activeCategory: Category | null;
+  priceRange: { min: number; max: number };
 }) {
   const [expandedSections, setExpandedSections] = useState({
     compatibility: true,
     price: true,
     manufacturer: true,
     memory: false,
+    merchants: true,
   });
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -130,9 +207,9 @@ function FilterSidebar({
   };
 
   return (
-    <aside className="w-64 shrink-0 bg-[#f5f5f5]">
+    <aside className="w-64 shrink-0">
       {/* Part List Box */}
-      <div className="bg-white border border-[#d1d5db] rounded-lg p-4 mb-4">
+      <div className="bg-white border border-[#d1d5db] rounded-lg p-4 mb-4 shadow-sm">
         <div className="flex items-center gap-2 mb-3">
           <div className="w-6 h-6 bg-[#4f46e5] rounded flex items-center justify-center">
             <ShoppingCart className="w-3 h-3 text-white" />
@@ -141,10 +218,6 @@ function FilterSidebar({
         </div>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-[#6b7280]">Parts:</span>
-            <span className="font-medium text-[#374151]">0</span>
-          </div>
-          <div className="flex justify-between">
             <span className="text-[#6b7280]">Total:</span>
             <span className="font-medium text-[#0d9488]">$0.00</span>
           </div>
@@ -152,6 +225,45 @@ function FilterSidebar({
             <span className="text-[#9ca3af]">Est. Wattage:</span>
             <span className="text-[#9ca3af]">0W</span>
           </div>
+          <button className="w-full mt-2 py-1.5 bg-[#4f46e5] text-white text-xs font-medium rounded hover:bg-[#4338ca] transition-colors">
+            Start New Build
+          </button>
+        </div>
+      </div>
+
+      {/* Merchants / Pricing */}
+      <div className="bg-white border border-[#d1d5db] rounded-lg p-4 mb-4 shadow-sm">
+        <h3 className="text-sm font-semibold text-[#374151] mb-3">Merchants / Pricing</h3>
+        
+        {/* Price Range Slider */}
+        <div className="mb-4">
+          <div className="flex justify-between text-xs text-[#6b7280] mb-1">
+            <span>${priceRange.min.toLocaleString()}</span>
+            <span>${priceRange.max.toLocaleString()}</span>
+          </div>
+          <div className="h-2 bg-[#e5e7eb] rounded-full overflow-hidden">
+            <div className="h-full bg-[#4f46e5] rounded-full" style={{ width: "100%" }} />
+          </div>
+        </div>
+
+        {/* Merchant Checkboxes */}
+        <div className="space-y-2">
+          {MERCHANTS.map((merchant) => (
+            <label key={merchant.id} className="flex items-center gap-2 cursor-pointer">
+              <Checkbox defaultChecked />
+              <span className="text-sm text-[#4b5563] flex items-center gap-1">
+                <span style={{ color: merchant.color }}>{merchant.logo}</span>
+                {merchant.name}
+              </span>
+            </label>
+          ))}
+        </div>
+
+        <div className="mt-3 pt-3 border-t border-[#e5e7eb]">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <Checkbox />
+            <span className="text-sm text-[#4b5563]">Include mail-in rebates</span>
+          </label>
         </div>
       </div>
 
@@ -354,10 +466,12 @@ function ProductTable({
   products,
   selectedIds,
   onToggleSelection,
+  category,
 }: {
   products: HardwareComponent[];
   selectedIds: Set<string>;
   onToggleSelection: (id: string) => void;
+  category: Category | null;
 }) {
   const router = useRouter();
 
@@ -370,26 +484,71 @@ function ProductTable({
     );
   }
 
+  // Get columns based on category
+  const getColumns = () => {
+    switch (category) {
+      case "CPU":
+        return [
+          { key: "cores", label: "Core Count", width: "w-24" },
+          { key: "clock", label: "Perf. Core Clock", width: "w-28" },
+          { key: "boost", label: "Perf. Core Boost", width: "w-28" },
+          { key: "tdp", label: "TDP", width: "w-16" },
+          { key: "graphics", label: "Integrated Graphics", width: "w-32" },
+          { key: "rating", label: "Rating", width: "w-24" },
+          { key: "price", label: "Price", width: "w-20" },
+        ];
+      case "GPU":
+        return [
+          { key: "vram", label: "VRAM", width: "w-20" },
+          { key: "cuda", label: "CUDA Cores", width: "w-24" },
+          { key: "tdp", label: "TDP", width: "w-16" },
+          { key: "architecture", label: "Architecture", width: "w-28" },
+          { key: "rating", label: "Rating", width: "w-24" },
+          { key: "price", label: "Price", width: "w-20" },
+        ];
+      default:
+        return [
+          { key: "specs", label: "Specs", width: "w-32" },
+          { key: "rating", label: "Rating", width: "w-24" },
+          { key: "price", label: "Price", width: "w-20" },
+        ];
+    }
+  };
+
+  const columns = getColumns();
+
   return (
-    <div className="bg-white border border-[#d1d5db] rounded-lg overflow-hidden">
+    <div className="bg-white border border-[#d1d5db] rounded-lg overflow-hidden shadow-sm">
       {/* Desktop Table */}
-      <div className="hidden md:block overflow-x-auto">
+      <div className="hidden lg:block overflow-x-auto">
         <Table>
           <TableHeader className="bg-[#f9fafb]">
             <TableRow className="border-b border-[#e5e7eb] hover:bg-transparent">
               <TableHead className="w-10 px-3 py-2"></TableHead>
               <TableHead className="w-12 px-3 py-2 text-xs font-semibold text-[#374151]"></TableHead>
               <TableHead className="px-3 py-2 text-xs font-semibold text-[#374151] text-left">Name</TableHead>
-              <TableHead className="w-24 px-3 py-2 text-xs font-semibold text-[#374151] text-center">Specs</TableHead>
-              <TableHead className="w-20 px-3 py-2 text-xs font-semibold text-[#374151] text-center">Rating</TableHead>
-              <TableHead className="w-24 px-3 py-2 text-xs font-semibold text-[#374151] text-right">Price</TableHead>
-              <TableHead className="w-20 px-3 py-2 text-xs font-semibold text-[#374151] text-center">Buy</TableHead>
+              
+              {/* Dynamic Spec Columns */}
+              {columns.map((col) => (
+                <TableHead key={col.key} className={`${col.width} px-3 py-2 text-xs font-semibold text-[#374151] text-center`}>
+                  {col.label}
+                </TableHead>
+              ))}
+              
+              {/* Merchant Columns */}
+              {MERCHANTS.map((merchant) => (
+                <TableHead key={merchant.id} className="w-24 px-2 py-2 text-xs font-semibold text-[#374151] text-center">
+                  <div className="flex items-center justify-center gap-1">
+                    <span style={{ color: merchant.color }}>{merchant.logo}</span>
+                    {merchant.name}
+                  </div>
+                </TableHead>
+              ))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {products.map((product) => {
               const vram = extractVram(product.specs);
-              const bestLink = product.directLinks?.amazon || "#";
 
               return (
                 <TableRow
@@ -439,39 +598,66 @@ function ProductTable({
                     <p className="text-xs text-[#6b7280]">{product.brand}</p>
                   </TableCell>
 
-                  {/* Specs */}
-                  <TableCell className="px-3 py-3 text-center">
-                    <span className="text-xs text-[#4b5563]">
+                  {/* Spec Columns - Dynamic */}
+                  {category === "CPU" && (
+                    <>
+                      <TableCell className="px-3 py-3 text-center text-sm text-[#4b5563]">
+                        {product.specs.cores || "-"}
+                      </TableCell>
+                      <TableCell className="px-3 py-3 text-center text-sm text-[#4b5563]">
+                        {product.specs.clock?.split("/")[0]?.trim() || "-"}
+                      </TableCell>
+                      <TableCell className="px-3 py-3 text-center text-sm text-[#4b5563]">
+                        {product.specs.clock?.split("/")[1]?.trim() || "-"}
+                      </TableCell>
+                      <TableCell className="px-3 py-3 text-center text-sm text-[#4b5563]">
+                        {product.specs.tdp || "-"}
+                      </TableCell>
+                      <TableCell className="px-3 py-3 text-center text-sm text-[#4b5563]">
+                        Radeon
+                      </TableCell>
+                    </>
+                  )}
+                  
+                  {category === "GPU" && (
+                    <>
+                      <TableCell className="px-3 py-3 text-center text-sm text-[#4b5563]">
+                        {product.specs.vram || "-"}
+                      </TableCell>
+                      <TableCell className="px-3 py-3 text-center text-sm text-[#4b5563]">
+                        {product.specs.cuda || "-"}
+                      </TableCell>
+                      <TableCell className="px-3 py-3 text-center text-sm text-[#4b5563]">
+                        {product.specs.tdp || "-"}
+                      </TableCell>
+                      <TableCell className="px-3 py-3 text-center text-sm text-[#4b5563]">
+                        {product.specs.architecture || "-"}
+                      </TableCell>
+                    </>
+                  )}
+                  
+                  {!category && (
+                    <TableCell className="px-3 py-3 text-center text-sm text-[#4b5563]">
                       {product.specs.vram || product.specs.cores || product.specs.capacity || "-"}
-                    </span>
-                  </TableCell>
+                    </TableCell>
+                  )}
 
                   {/* Rating */}
-                  <TableCell className="px-3 py-3">
-                    <StarRating score={product.aiScore} />
+                  <TableCell className="px-3 py-3 text-center">
+                    <StarRating score={product.aiScore} count={Math.round(product.aiScore / 2)} />
                   </TableCell>
 
                   {/* Price */}
-                  <TableCell className="px-3 py-3 text-right">
+                  <TableCell className="px-3 py-3 text-center">
                     <span className="text-sm font-semibold text-[#0d9488]">
                       ${product.price.toLocaleString()}
                     </span>
                   </TableCell>
 
-                  {/* Buy Button */}
-                  <TableCell className="px-3 py-3">
-                    <div className="flex items-center justify-center gap-1">
-                      <Link
-                        href={bestLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3 py-1.5 bg-[#4f46e5] hover:bg-[#4338ca] text-white text-xs font-medium rounded transition-colors"
-                      >
-                        Add
-                      </Link>
-                      <span className="text-xs text-[#9ca3af]">$</span>
-                    </div>
-                  </TableCell>
+                  {/* Merchant Columns */}
+                  {MERCHANTS.map((merchant) => (
+                    <MerchantPrice key={merchant.id} product={product} merchantId={merchant.id} />
+                  ))}
                 </TableRow>
               );
             })}
@@ -480,58 +666,54 @@ function ProductTable({
       </div>
 
       {/* Mobile List View */}
-      <div className="md:hidden divide-y divide-[#e5e7eb]">
-        {products.map((product) => {
-          const bestLink = product.directLinks?.amazon || "#";
-
-          return (
-            <div key={product.id} className="p-4 hover:bg-[#f9fafb]">
-              <div className="flex items-start gap-3">
-                <div className="w-12 h-12 bg-[#f3f4f6] rounded flex items-center justify-center overflow-hidden shrink-0">
-                  {product.imageUrl ? (
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
+      <div className="lg:hidden divide-y divide-[#e5e7eb]">
+        {products.map((product) => (
+          <div key={product.id} className="p-4 hover:bg-[#f9fafb]">
+            <div className="flex items-start gap-3">
+              <div className="w-12 h-12 bg-[#f3f4f6] rounded flex items-center justify-center overflow-hidden shrink-0">
+                {product.imageUrl ? (
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  product.category === "GPU" ? (
+                    <Monitor className="w-6 h-6 text-[#9ca3af]" />
                   ) : (
-                    product.category === "GPU" ? (
-                      <Monitor className="w-6 h-6 text-[#9ca3af]" />
-                    ) : (
-                      <Cpu className="w-6 h-6 text-[#9ca3af]" />
-                    )
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
+                    <Cpu className="w-6 h-6 text-[#9ca3af]" />
+                  )
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <Link
+                  href={`/product/${product.id}`}
+                  className="text-sm font-medium text-[#4f46e5] hover:underline block truncate"
+                >
+                  {product.name}
+                </Link>
+                <p className="text-xs text-[#6b7280] mb-1">{product.brand}</p>
+                <StarRating score={product.aiScore} />
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-sm font-semibold text-[#0d9488]">
+                    ${product.price.toLocaleString()}
+                  </span>
                   <Link
-                    href={`/product/${product.id}`}
-                    className="text-sm font-medium text-[#4f46e5] hover:underline block truncate"
+                    href={product.directLinks?.amazon || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 bg-[#16a34a] text-white text-xs rounded"
                   >
-                    {product.name}
+                    Buy
                   </Link>
-                  <p className="text-xs text-[#6b7280] mb-1">{product.brand}</p>
-                  <StarRating score={product.aiScore} />
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-sm font-semibold text-[#0d9488]">
-                      ${product.price.toLocaleString()}
-                    </span>
-                    <Link
-                      href={bestLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-1.5 bg-[#4f46e5] text-white text-xs rounded"
-                    >
-                      Add
-                    </Link>
-                  </div>
                 </div>
               </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -635,6 +817,16 @@ function ProductsPageContent() {
     });
   };
 
+  // Calculate price range
+  const priceRange = useMemo(() => {
+    if (sortedProducts.length === 0) return { min: 0, max: 0 };
+    const prices = sortedProducts.map(p => p.price);
+    return {
+      min: Math.min(...prices),
+      max: Math.max(...prices)
+    };
+  }, [sortedProducts]);
+
   return (
     <div className="min-h-screen bg-[#f5f5f5]">
       {/* Blue Header - PCPartPicker Style */}
@@ -675,6 +867,7 @@ function ProductsPageContent() {
             setFilters={setFilters}
             resultCount={sortedProducts.length}
             activeCategory={activeCategory}
+            priceRange={priceRange}
           />
 
           <main className="flex-1 min-w-0">
@@ -700,6 +893,7 @@ function ProductsPageContent() {
               products={sortedProducts}
               selectedIds={selectedIds}
               onToggleSelection={toggleSelection}
+              category={activeCategory}
             />
           </main>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { 
   ArrowLeft, 
@@ -17,7 +18,8 @@ import {
   ChevronDown,
   ChevronUp,
   Share2,
-  Heart
+  Heart,
+  X
 } from "lucide-react";
 import type { HardwareComponent } from "@/data/components";
 
@@ -98,31 +100,63 @@ export default function ProductDetail({ component, similarProducts }: ProductDet
             {/* Header */}
             <div className="flex items-start justify-between">
               <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="px-2 py-1 bg-[#0d9488]/10 text-[#0d9488] text-xs font-medium rounded">
-                    {component.category}
-                  </span>
-                  <span className="px-2 py-1 bg-[#f5f5f5] text-[#6b7280] text-xs rounded">
-                    {component.brand}
-                  </span>
-                  {component.inStock ? (
-                    <span className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
-                      <Check className="w-3 h-3" />
-                      In Stock
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 text-xs rounded">
-                      <AlertCircle className="w-3 h-3" />
-                      Out of Stock
-                    </span>
-                  )}
-                </div>
-                <h1 className="text-3xl font-bold text-[#0a0a0a] mb-2">{component.name}</h1>
-                <div className="flex items-center gap-4">
-                  <StarRating score={component.aiScore} />
-                  <span className="text-[#d1d5db]">|</span>
-                  <span className="text-sm text-[#6b7280]">AI Score: {component.aiScore}/100</span>
-                </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
+              className="flex items-center gap-3 mb-2"
+            >
+              <motion.span 
+                className="px-2.5 py-1 bg-[#0d9488]/10 text-[#0d9488] text-xs font-semibold rounded-md border border-[#0d9488]/20"
+                whileHover={{ scale: 1.05, backgroundColor: "rgba(13, 148, 136, 0.15)" }}
+                transition={{ duration: 0.2 }}
+              >
+                {component.category}
+              </motion.span>
+              <span className="px-2.5 py-1 bg-[#f5f5f5] text-[#6b7280] text-xs font-medium rounded-md border border-[#e5e5e5]">
+                {component.brand}
+              </span>
+              {component.inStock ? (
+                <motion.span 
+                  className="flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-md border border-green-200"
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                >
+                  <motion.div
+                    className="w-1.5 h-1.5 rounded-full bg-green-500"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                  In Stock
+                </motion.span>
+              ) : (
+                <span className="flex items-center gap-1.5 px-2.5 py-1 bg-red-50 text-red-700 text-xs font-medium rounded-md border border-red-200">
+                  <X className="w-3 h-3" />
+                  Out of Stock
+                </span>
+              )}
+            </motion.div>
+            
+            <motion.h1 
+              className="text-3xl sm:text-4xl font-bold text-[#0a0a0a] mb-3 tracking-tight"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              {component.name}
+            </motion.h1>
+            
+            <motion.div 
+              className="flex items-center gap-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              <StarRating score={component.aiScore} />
+              <span className="text-[#e5e7eb]">|</span>
+              <span className="text-sm text-[#6b7280]">AI Score: <span className="font-semibold text-[#0d9488]">{component.aiScore}/100</span></span>
+            </motion.div>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -141,68 +175,74 @@ export default function ProductDetail({ component, similarProducts }: ProductDet
               </div>
             </div>
 
-            {/* Product Image */}
-            <div className="aspect-video bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl overflow-hidden">
+            {/* Product Image with Premium Effects */}
+            <motion.div 
+              className="aspect-video bg-gradient-to-br from-[#f8fafc] to-[#f1f5f9] border border-[#e2e8f0] rounded-2xl overflow-hidden shadow-lg"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+              whileHover={{ scale: 1.01 }}
+            >
               {component.imageUrl ? (
-                <img
+                <motion.img
                   src={component.imageUrl}
                   alt={component.name}
                   className="w-full h-full object-cover"
+                  initial={{ scale: 1.1 }}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.4 }}
                   onError={(e) => {
-                    // Fallback to icon if image fails to load
                     e.currentTarget.style.display = 'none';
-                    const parent = e.currentTarget.parentElement;
-                    if (parent) {
-                      parent.innerHTML = `
-                        <div class="flex items-center justify-center h-full">
-                          <div class="text-center">
-                            ${isGPU 
-                              ? '<svg class="w-24 h-24 text-[#d1d5db] mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>'
-                              : isCPU
-                                ? '<svg class="w-24 h-24 text-[#d1d5db] mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>'
-                                : '<svg class="w-24 h-24 text-[#d1d5db] mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'
-                            }
-                            <p class="text-[#9ca3af]">${component.name}</p>
-                          </div>
-                        </div>
-                      `;
-                    }
                   }}
                 />
               ) : (
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center">
                     {isGPU ? (
-                      <Monitor className="w-24 h-24 text-[#d1d5db] mx-auto mb-4" />
+                      <Monitor className="w-24 h-24 text-[#cbd5e1] mx-auto mb-4" strokeWidth={1} />
                     ) : isCPU ? (
-                      <Cpu className="w-24 h-24 text-[#d1d5db] mx-auto mb-4" />
+                      <Cpu className="w-24 h-24 text-[#cbd5e1] mx-auto mb-4" strokeWidth={1} />
                     ) : (
-                      <Zap className="w-24 h-24 text-[#d1d5db] mx-auto mb-4" />
+                      <Zap className="w-24 h-24 text-[#cbd5e1] mx-auto mb-4" strokeWidth={1} />
                     )}
-                    <p className="text-[#9ca3af]">{component.name}</p>
+                    <p className="text-[#94a3b8] font-medium">{component.name}</p>
                   </div>
                 </div>
               )}
-            </div>
+            </motion.div>
 
-            {/* Tabs */}
-            <div className="border-b border-[#e5e5e5]">
-              <div className="flex gap-6">
-                {["specs", "benchmarks", "reviews"].map((tab) => (
-                  <button
+            {/* Animated Tabs */}
+            <motion.div 
+              className="border-b border-[#e2e8f0]"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              <div className="flex gap-1">
+                {["specs", "benchmarks", "reviews"].map((tab, index) => (
+                  <motion.button
                     key={tab}
                     onClick={() => setActiveTab(tab as any)}
-                    className={`py-3 text-sm font-medium capitalize border-b-2 transition-colors ${
+                    className={`relative py-3 px-4 text-sm font-medium capitalize transition-colors rounded-t-lg ${
                       activeTab === tab
-                        ? "text-[#4f46e5] border-[#4f46e5]"
-                        : "text-[#6b7280] border-transparent hover:text-[#0a0a0a]"
+                        ? "text-[#4f46e5]"
+                        : "text-[#64748b] hover:text-[#374151]"
                     }`}
+                    whileHover={{ backgroundColor: activeTab === tab ? "transparent" : "rgba(79, 70, 229, 0.05)" }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     {tab}
-                  </button>
+                    {activeTab === tab && (
+                      <motion.div
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#4f46e5] to-[#7c3aed]"
+                        layoutId="activeTab"
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      />
+                    )}
+                  </motion.button>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
             {/* Tab Content */}
             {activeTab === "specs" && (
@@ -297,110 +337,160 @@ export default function ProductDetail({ component, similarProducts }: ProductDet
           </div>
 
           {/* Right Column - Buy Box */}
-          <div className="lg:col-span-1">
+          <motion.div 
+            className="lg:col-span-1"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          >
             <div className="sticky top-20 space-y-4">
-              {/* Price Comparison */}
-              <div className="bg-white border border-[#e5e5e5] rounded-xl p-6 shadow-sm">
+              {/* Price Comparison - Glassmorphism Card */}
+              <motion.div 
+                className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.08)]"
+                whileHover={{ y: -2, boxShadow: "0_12px_40px_rgb(0,0,0,0.12)" }}
+                transition={{ duration: 0.3 }}
+              >
                 <div className="flex items-baseline gap-2 mb-4">
-                  <span className="text-3xl font-bold text-[#0d9488]">${lowestPrice.toLocaleString()}</span>
-                  <span className="text-[#9ca3af]">Lowest Price</span>
+                  <motion.span 
+                    className="text-4xl font-bold bg-gradient-to-r from-[#0d9488] to-[#14b8a6] bg-clip-text text-transparent"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.7, type: "spring" }}
+                  >
+                    ${lowestPrice.toLocaleString()}
+                  </motion.span>
+                  <span className="text-[#94a3b8] text-sm">Lowest Price</span>
                 </div>
 
                 {/* Store List */}
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {Object.entries(prices).length > 0 ? (
-                    Object.entries(prices).map(([store, data]) => (
-                      <a
+                    Object.entries(prices).map(([store, data], index) => (
+                      <motion.a
                         key={store}
                         href={data.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center justify-between p-3 bg-[#f5f5f5] rounded-lg hover:bg-[#e5e5e5] transition-colors group"
+                        className="flex items-center justify-between p-3 bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] rounded-xl hover:shadow-md transition-all group"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: 0.8 + index * 0.1 }}
+                        whileHover={{ scale: 1.02, x: 4 }}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`w-2 h-2 rounded-full ${data.inStock ? "bg-green-500" : "bg-red-500"}`} />
-                          <span className="text-sm text-[#0a0a0a] capitalize">{store}</span>
+                          <motion.div 
+                            className={`w-2 h-2 rounded-full ${data.inStock ? "bg-green-500" : "bg-red-500"}`}
+                            animate={data.inStock ? { scale: [1, 1.2, 1] } : {}}
+                            transition={{ duration: 2, repeat: Infinity }}
+                          />
+                          <span className="text-sm font-medium text-[#1e293b] capitalize">{store}</span>
                           {data.price === lowestPrice && data.inStock && (
-                            <span className="px-2 py-0.5 bg-[#0d9488]/10 text-[#0d9488] text-xs rounded">Best</span>
+                            <span className="px-2 py-0.5 bg-gradient-to-r from-[#0d9488]/20 to-[#14b8a6]/20 text-[#0d9488] text-xs font-semibold rounded-full border border-[#0d9488]/20">
+                              Best
+                            </span>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[#0a0a0a] font-medium">${data.price}</span>
-                          <ExternalLink className="w-4 h-4 text-[#9ca3af] group-hover:text-[#6b7280]" />
+                          <span className="text-[#1e293b] font-semibold">${data.price}</span>
+                          <ExternalLink className="w-4 h-4 text-[#94a3b8] group-hover:text-[#64748b] transition-colors" />
                         </div>
-                      </a>
+                      </motion.a>
                     ))
                   ) : (
-                    <a
+                    <motion.a
                       href={component.directLinks?.amazon || "#"}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full py-3 bg-[#ff9900] hover:bg-[#ff8800] text-white font-semibold rounded-lg transition-colors"
+                      className="flex items-center justify-center gap-2 w-full py-4 bg-gradient-to-r from-[#ff9900] to-[#ff8800] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
                     >
                       <ShoppingCart className="w-5 h-5" />
                       View on Amazon
-                    </a>
+                    </motion.a>
                   )}
                 </div>
 
                 {/* Additional Stores */}
-                <div className="mt-4 pt-4 border-t border-[#e5e5e5]">
-                  <p className="text-xs text-[#9ca3af] mb-3">Also available at:</p>
+                <div className="mt-4 pt-4 border-t border-[#e2e8f0]">
+                  <p className="text-xs text-[#94a3b8] mb-3 font-medium">Also available at:</p>
                   <div className="flex flex-wrap gap-2">
                     {component.directLinks?.ebay && (
-                      <a
+                      <motion.a
                         href={component.directLinks.ebay}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-1.5 bg-[#e53238] text-white text-xs font-medium rounded hover:opacity-90 transition-opacity"
+                        className="px-4 py-2 bg-gradient-to-r from-[#e53238] to-[#c41e3a] text-white text-xs font-semibold rounded-lg shadow-md"
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
                       >
                         eBay
-                      </a>
+                      </motion.a>
                     )}
                     {component.directLinks?.aliexpress && (
-                      <a
+                      <motion.a
                         href={component.directLinks.aliexpress}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-1.5 bg-[#ff4747] text-white text-xs font-medium rounded hover:opacity-90 transition-opacity"
+                        className="px-4 py-2 bg-gradient-to-r from-[#ff4747] to-[#e03e3e] text-white text-xs font-semibold rounded-lg shadow-md"
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
                       >
                         AliExpress
-                      </a>
+                      </motion.a>
                     )}
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
-              {/* AI Score Card */}
-              <div className="bg-white border border-[#e5e5e5] rounded-xl p-6 shadow-sm">
+              {/* AI Score Card - Premium */}
+              <motion.div 
+                className="bg-gradient-to-br from-white/90 to-[#f8fafc]/90 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.08)]"
+                whileHover={{ y: -2 }}
+                transition={{ duration: 0.3 }}
+              >
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-[#0d9488]/10 rounded-lg">
+                  <motion.div 
+                    className="p-2.5 bg-gradient-to-br from-[#0d9488]/20 to-[#14b8a6]/20 rounded-xl"
+                    whileHover={{ rotate: 10, scale: 1.1 }}
+                    transition={{ type: "spring", stiffness: 400 }}
+                  >
                     <TrendingUp className="w-5 h-5 text-[#0d9488]" />
-                  </div>
+                  </motion.div>
                   <div>
-                    <p className="text-sm text-[#6b7280]">AI Performance Score</p>
-                    <p className="text-2xl font-bold text-[#0a0a0a]">{component.aiScore}/100</p>
+                    <p className="text-sm text-[#64748b] font-medium">AI Performance Score</p>
+                    <p className="text-3xl font-bold bg-gradient-to-r from-[#1e293b] to-[#334155] bg-clip-text text-transparent">
+                      {component.aiScore}
+                      <span className="text-lg text-[#94a3b8] font-normal">/100</span>
+                    </p>
                   </div>
                 </div>
-                <div className="h-2 bg-[#e5e5e5] rounded-full overflow-hidden mb-2">
-                  <div 
-                    className="h-full bg-gradient-to-r from-[#0d9488] to-[#14b8a6] rounded-full"
-                    style={{ width: `${component.aiScore}%` }}
+                <div className="h-2.5 bg-[#e2e8f0] rounded-full overflow-hidden">
+                  <motion.div 
+                    className="h-full bg-gradient-to-r from-[#0d9488] via-[#14b8a6] to-[#2dd4bf] rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${component.aiScore}%` }}
+                    transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
                   />
                 </div>
-                <p className="text-xs text-[#9ca3af]">Based on LLM inference, training, and efficiency benchmarks</p>
-              </div>
+                <p className="text-xs text-[#94a3b8] mt-2">Based on LLM inference benchmarks</p>
+              </motion.div>
 
-              {/* Compare Button */}
-              <Link
-                href={`/compare?id1=${component.id}`}
-                className="flex items-center justify-center gap-2 w-full py-3 bg-white hover:bg-[#f5f5f5] text-[#0a0a0a] font-medium rounded-lg border border-[#e5e5e5] transition-colors"
+              {/* Compare Button - Premium */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <Scale className="w-5 h-5" />
-                Compare with Similar
-              </Link>
+                <Link
+                  href={`/compare?id1=${component.id}`}
+                  className="flex items-center justify-center gap-2 w-full py-4 bg-white/80 backdrop-blur-sm hover:bg-white text-[#1e293b] font-semibold rounded-xl border border-[#e2e8f0] shadow-[0_4px_20px_rgb(0,0,0,0.05)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] transition-all"
+                >
+                  <Scale className="w-5 h-5 text-[#64748b]" />
+                  Compare with Similar
+                </Link>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
