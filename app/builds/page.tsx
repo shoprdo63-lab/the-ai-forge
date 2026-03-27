@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { 
   Cpu, 
   Zap, 
@@ -14,8 +13,8 @@ import {
   ChevronRight,
   Plus,
   ArrowRight,
-  Sparkles,
-  Gauge
+  Gauge,
+  Monitor
 } from "lucide-react";
 import { useState } from "react";
 import { type HardwareComponent } from "@/data/components";
@@ -113,29 +112,12 @@ const FILTER_TAGS = ["All", "AI Training", "Budget", "Datacenter", "Workstation"
 
 const categoryIcons: Record<string, React.ReactNode> = {
   CPU: <Cpu className="h-3.5 w-3.5" strokeWidth={1.5} />,
-  GPU: <Zap className="h-3.5 w-3.5" strokeWidth={1.5} />,
+  GPU: <Monitor className="h-3.5 w-3.5" strokeWidth={1.5} />,
   Motherboard: <Layers className="h-3.5 w-3.5" strokeWidth={1.5} />,
   RAM: <Layers className="h-3.5 w-3.5" strokeWidth={1.5} />,
   Storage: <HardDrive className="h-3.5 w-3.5" strokeWidth={1.5} />,
   PSU: <Battery className="h-3.5 w-3.5" strokeWidth={1.5} />,
   Cooling: <Thermometer className="h-3.5 w-3.5" strokeWidth={1.5} />,
-};
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const },
-  },
 };
 
 function formatPrice(price: number): string {
@@ -152,208 +134,168 @@ export default function CompletedBuilds() {
       );
 
   return (
-    <div className="min-h-screen bg-[#050505]">
-      {/* Header Section */}
-      <div className="relative border-b border-white/5">
-        {/* Background Glow */}
-        <div 
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse at 30% 0%, rgba(16, 185, 129, 0.08) 0%, transparent 60%)",
-          }}
-        />
-        
-        <div className="relative max-w-[1800px] mx-auto px-6 py-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="icon-geometric">
-                <Sparkles className="w-5 h-5" />
+    <div className="min-h-screen bg-[#f3f4f6]">
+      {/* Blue Header - PCPartPicker Style */}
+      <header className="bg-[#4f46e5] text-white">
+        <div className="max-w-[1600px] mx-auto px-4 py-4">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="p-2 rounded-lg hover:bg-white/20 text-white/80 hover:text-white transition-colors"
+            >
+              <ArrowRight className="w-5 h-5 rotate-180" />
+            </Link>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                <Gauge className="w-5 h-5 text-white" />
               </div>
-              <span className="label-mono">Community Showcase</span>
+              <div>
+                <h1 className="text-xl font-semibold">Completed Builds</h1>
+                <p className="text-sm text-white/70">Community workstation configurations</p>
+              </div>
             </div>
-            <h1 className="headline-hero text-4xl md:text-5xl lg:text-6xl mb-4">
-              Completed Builds
-            </h1>
-            <p className="body-premium text-lg max-w-2xl">
-              Browse AI workstation builds from the community. Get inspired and discover the perfect configuration for your machine learning workloads.
-            </p>
-          </motion.div>
+          </div>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-[1800px] mx-auto px-6 py-12">
+      <div className="max-w-[1600px] mx-auto px-4 py-6">
         {/* Filter Pills */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="flex flex-wrap gap-3 mb-12"
-        >
+        <div className="flex flex-wrap gap-2 mb-6">
           {FILTER_TAGS.map((tag) => (
             <button
               key={tag}
               onClick={() => setFilter(tag.toLowerCase())}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 filter === tag.toLowerCase()
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                  : "bg-white/[0.02] text-zinc-400 border border-white/5 hover:border-white/10 hover:text-zinc-200"
+                  ? "bg-[#4f46e5] text-white"
+                  : "bg-white text-[#374151] border border-[#d1d5db] hover:bg-[#f9fafb]"
               }`}
             >
               {tag}
             </button>
           ))}
-        </motion.div>
+        </div>
 
         {/* Builds Grid */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8"
-        >
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
           {filteredBuilds.map((build) => (
-            <motion.div
+            <div
               key={build.id}
-              variants={itemVariants}
-              className="group"
+              className="bg-white border border-[#d1d5db] rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
             >
-              <div className="glass-premium h-full flex flex-col overflow-hidden">
-                {/* Build Header */}
-                <div className="p-6 border-b border-white/5">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="headline-card text-lg mb-2 group-hover:text-emerald-400 transition-colors duration-300">
-                        {build.name}
-                      </h3>
-                      <div className="flex items-center gap-2 text-xs text-zinc-500">
-                        <span className="font-mono uppercase tracking-wider">@{build.author}</span>
-                        <span>•</span>
-                        <span className="font-mono">{build.date}</span>
-                      </div>
-                    </div>
-                    <div className="text-right ml-4">
-                      <p className="text-2xl font-light text-emerald-400 font-mono tracking-tight">
-                        {formatPrice(build.totalPrice)}
-                      </p>
-                      <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-mono mt-1">
-                        Total Cost
-                      </p>
+              {/* Build Header */}
+              <div className="p-4 border-b border-[#e5e7eb]">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-semibold text-[#374151] mb-1">
+                      {build.name}
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs text-[#6b7280]">
+                      <span className="font-medium">@{build.author}</span>
+                      <span>•</span>
+                      <span>{build.date}</span>
                     </div>
                   </div>
-                  
-                  <p className="text-sm text-zinc-400 leading-relaxed line-clamp-2">
-                    {build.description}
-                  </p>
-                  
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {build.tags.map((tag) => (
-                      <span 
-                        key={tag}
-                        className="px-2.5 py-1 bg-white/[0.03] border border-white/[0.06] rounded-md text-[11px] text-zinc-500 uppercase tracking-wider font-mono"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* AI Score Badge */}
-                  <div className="flex items-center gap-2 mt-4">
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                      <Gauge className="w-3.5 h-3.5 text-emerald-400" />
-                      <span className="text-xs text-emerald-400 font-mono">
-                        AI Score: {build.aiScore}/100
-                      </span>
-                    </div>
+                  <div className="text-right ml-4">
+                    <p className="text-xl font-bold text-[#0d9488]">
+                      {formatPrice(build.totalPrice)}
+                    </p>
                   </div>
                 </div>
-
-                {/* Components List */}
-                <div className="p-4 space-y-2 flex-1">
-                  {Object.entries(build.components).map(([category, component]) => {
-                    if (!component) return null;
-                    return (
-                      <div 
-                        key={category} 
-                        className="flex items-center gap-3 p-2 rounded-lg bg-white/[0.01] hover:bg-white/[0.03] transition-colors"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-emerald-400/70 shrink-0">
-                          {categoryIcons[component.category]}
-                        </div>
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-mono w-16 shrink-0">
-                          {component.category}
-                        </span>
-                        <span className="text-sm text-zinc-300 truncate flex-1 font-light">
-                          {component.name}
-                        </span>
-                        <span className="text-sm text-emerald-400/70 shrink-0 font-mono">
-                          {formatPrice(component.price)}
-                        </span>
-                      </div>
-                    );
-                  })}
+                
+                <p className="text-sm text-[#6b7280] leading-relaxed line-clamp-2">
+                  {build.description}
+                </p>
+                
+                {/* Tags */}
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {build.tags.map((tag) => (
+                    <span 
+                      key={tag}
+                      className="px-2 py-0.5 bg-[#f3f4f6] rounded text-[10px] text-[#6b7280]"
+                    >
+                      {tag}
+                    </span>
+                  ))}
                 </div>
 
-                {/* Footer */}
-                <div className="px-6 py-4 border-t border-white/5 flex items-center justify-between">
-                  <div className="flex items-center gap-6">
-                    <button className="flex items-center gap-2 text-xs text-zinc-500 hover:text-emerald-400 transition-colors">
-                      <Heart className="h-4 w-4" strokeWidth={1.5} />
-                      <span className="font-mono">{build.likes}</span>
-                    </button>
-                    <button className="flex items-center gap-2 text-xs text-zinc-500 hover:text-blue-400 transition-colors">
-                      <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
-                      <span className="font-mono">{build.comments}</span>
-                    </button>
+                {/* AI Score */}
+                <div className="flex items-center gap-2 mt-3">
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-[#f0fdf4] rounded">
+                    <Gauge className="w-3 h-3 text-[#16a34a]" />
+                    <span className="text-xs text-[#16a34a] font-medium">
+                      AI: {build.aiScore}
+                    </span>
                   </div>
-                  <button className="flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors group/btn">
-                    <span className="font-mono uppercase tracking-wider text-xs">Details</span>
-                    <ChevronRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </button>
                 </div>
               </div>
-            </motion.div>
+
+              {/* Components List */}
+              <div className="p-3 space-y-1 bg-[#f9fafb]">
+                {Object.entries(build.components).map(([category, component]) => {
+                  if (!component) return null;
+                  return (
+                    <div 
+                      key={category} 
+                      className="flex items-center gap-3 p-2 rounded bg-white border border-[#e5e7eb]"
+                    >
+                      <div className="w-7 h-7 rounded bg-[#f3f4f6] flex items-center justify-center text-[#6b7280] shrink-0">
+                        {categoryIcons[component.category]}
+                      </div>
+                      <span className="text-[10px] text-[#9ca3af] uppercase w-14 shrink-0">
+                        {component.category}
+                      </span>
+                      <span className="text-sm text-[#374151] truncate flex-1">
+                        {component.name}
+                      </span>
+                      <span className="text-sm text-[#0d9488] shrink-0 font-medium">
+                        {formatPrice(component.price)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Footer */}
+              <div className="px-4 py-3 border-t border-[#e5e7eb] flex items-center justify-between bg-white">
+                <div className="flex items-center gap-4">
+                  <button className="flex items-center gap-1.5 text-xs text-[#6b7280] hover:text-[#4f46e5] transition-colors">
+                    <Heart className="h-4 w-4" strokeWidth={1.5} />
+                    <span>{build.likes}</span>
+                  </button>
+                  <button className="flex items-center gap-1.5 text-xs text-[#6b7280] hover:text-[#4f46e5] transition-colors">
+                    <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
+                    <span>{build.comments}</span>
+                  </button>
+                </div>
+                <button className="flex items-center gap-1 text-sm text-[#4f46e5] hover:text-[#4338ca] transition-colors">
+                  <span className="text-xs font-medium">Details</span>
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
           ))}
-        </motion.div>
+        </div>
 
         {/* Create Build CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          className="mt-16 relative"
-        >
-          {/* Background Glow */}
-          <div 
-            className="absolute inset-0 rounded-2xl pointer-events-none"
-            style={{
-              background: "radial-gradient(ellipse at center, rgba(16, 185, 129, 0.1) 0%, transparent 70%)",
-            }}
-          />
-          
-          <div className="relative glass-premium p-8 md:p-12 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 mb-6">
-              <Plus className="w-8 h-8 text-emerald-400" strokeWidth={1.5} />
-            </div>
-            <h2 className="headline-section text-2xl md:text-3xl mb-3">
-              Share Your Build
-            </h2>
-            <p className="body-premium max-w-xl mx-auto mb-8">
-              Contribute to the community by sharing your AI workstation configuration. Help others discover the perfect hardware setup for their needs.
-            </p>
-            <Link
-              href="/builder"
-              className="btn-premium inline-flex items-center gap-3"
-            >
-              <span>Create Your Build</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+        <div className="mt-8 bg-white border border-[#d1d5db] rounded-lg p-6 text-center shadow-sm">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-[#f5f3ff] border border-[#e5e7eb] mb-4">
+            <Plus className="w-6 h-6 text-[#4f46e5]" strokeWidth={1.5} />
           </div>
-        </motion.div>
+          <h2 className="text-xl font-semibold text-[#374151] mb-2">
+            Share Your Build
+          </h2>
+          <p className="text-sm text-[#6b7280] max-w-xl mx-auto mb-4">
+            Contribute to the community by sharing your AI workstation configuration.
+          </p>
+          <Link
+            href="/builder"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#4f46e5] text-white rounded-lg hover:bg-[#4338ca] transition-colors"
+          >
+            <span>Create Your Build</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
       </div>
     </div>
   );

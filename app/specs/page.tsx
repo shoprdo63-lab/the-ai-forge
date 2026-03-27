@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   ChevronDown,
@@ -14,13 +13,13 @@ import {
   HardDrive,
   Zap,
   DollarSign,
-  TrendingUp,
   X,
   ArrowUpDown,
+  Monitor,
+  ArrowLeft
 } from "lucide-react";
 import Link from "next/link";
 import { hardwareComponents, type HardwareComponent } from "@/data/components";
-import Navbar from "@/components/Navbar";
 
 // ============================================
 // Types & Interfaces
@@ -86,18 +85,16 @@ function MiniProgressBar({
   const percentage = max > 0 ? (value / max) * 100 : 0;
 
   const colorClasses = {
-    emerald: "bg-emerald-500",
-    blue: "bg-blue-500",
-    amber: "bg-amber-500",
+    emerald: "bg-[#16a34a]",
+    blue: "bg-[#4f46e5]",
+    amber: "bg-[#f59e0b]",
   };
 
   return (
-    <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden mt-1">
-      <motion.div
-        initial={{ width: 0 }}
-        animate={{ width: `${percentage}%` }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className={`h-full ${colorClasses[color]} rounded-full`}
+    <div className="w-full h-1 bg-[#e5e7eb] rounded-full overflow-hidden mt-1">
+      <div
+        className={`h-full ${colorClasses[color]} rounded-full transition-all duration-500`}
+        style={{ width: `${percentage}%` }}
       />
     </div>
   );
@@ -251,44 +248,56 @@ export default function SpecsPage() {
   // Get sort icon
   const getSortIcon = (key: string) => {
     if (sortConfig.key !== key) {
-      return <ArrowUpDown className="w-3 h-3 text-slate-600" />;
+      return <ArrowUpDown className="w-3 h-3 text-[#9ca3af]" />;
     }
     if (sortConfig.direction === "asc") {
-      return <ChevronUp className="w-4 h-4 text-emerald-400" />;
+      return <ChevronUp className="w-4 h-4 text-[#4f46e5]" />;
     }
     if (sortConfig.direction === "desc") {
-      return <ChevronDown className="w-4 h-4 text-emerald-400" />;
+      return <ChevronDown className="w-4 h-4 text-[#4f46e5]" />;
     }
-    return <ArrowUpDown className="w-3 h-3 text-slate-600" />;
+    return <ArrowUpDown className="w-3 h-3 text-[#9ca3af]" />;
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
-      <Navbar />
-
-      {/* Header */}
-      <div className="border-b border-white/10">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
-                Full Specs Comparison
-              </h1>
-              <p className="text-slate-400 text-sm">
-                Compare {hardwareComponents.length} AI hardware components side-by-side
-              </p>
+    <div className="min-h-screen bg-[#f3f4f6]">
+      {/* Blue Header - PCPartPicker Style */}
+      <header className="bg-[#4f46e5] text-white">
+        <div className="max-w-[1600px] mx-auto px-4 py-4">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="p-2 rounded-lg hover:bg-white/20 text-white/80 hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                <Grid3X3 className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold">Full Specs Comparison</h1>
+                <p className="text-sm text-white/70">Compare {hardwareComponents.length} AI hardware components</p>
+              </div>
             </div>
+          </div>
+        </div>
+      </header>
 
+      {/* Controls Bar */}
+      <div className="sticky top-0 z-30 bg-white border-b border-[#d1d5db] shadow-sm">
+        <div className="max-w-[1600px] mx-auto px-4 py-4">
+          <div className="flex flex-col lg:flex-row gap-4">
             {/* Category Filter */}
             <div className="flex items-center gap-2">
               {(["All", "GPU", "CPU"] as Category[]).map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setCategory(cat)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     category === cat
-                      ? "bg-emerald-600 text-white"
-                      : "bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700"
+                      ? "bg-[#4f46e5] text-white"
+                      : "bg-[#f3f4f6] text-[#374151] hover:bg-[#e5e7eb]"
                   }`}
                 >
                   {cat === "All" ? (
@@ -298,7 +307,7 @@ export default function SpecsPage() {
                     </span>
                   ) : cat === "GPU" ? (
                     <span className="flex items-center gap-1.5">
-                      <HardDrive className="w-4 h-4" />
+                      <Monitor className="w-4 h-4" />
                       GPUs
                     </span>
                   ) : (
@@ -310,29 +319,21 @@ export default function SpecsPage() {
                 </button>
               ))}
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Controls Bar */}
-      <div className="sticky top-0 z-30 bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-white/10">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col lg:flex-row gap-4">
             {/* Search */}
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af]" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search products..."
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-900/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50"
-                style={{ fontSize: "16px" }}
+                className="w-full pl-9 pr-9 py-2 bg-white border border-[#d1d5db] rounded-lg text-[#374151] placeholder-[#9ca3af] focus:outline-none focus:border-[#4f46e5] text-sm"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9ca3af] hover:text-[#374151]"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -341,25 +342,25 @@ export default function SpecsPage() {
 
             {/* Column Toggle Dropdown */}
             <div className="relative group">
-              <button className="flex items-center gap-2 px-4 py-2.5 bg-slate-900/50 border border-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors">
+              <button className="flex items-center gap-2 px-3 py-2 bg-white border border-[#d1d5db] rounded-lg text-[#374151] hover:bg-[#f9fafb] transition-colors text-sm">
                 <Filter className="w-4 h-4" />
-                <span className="text-sm">Columns</span>
+                <span>Columns</span>
                 <ChevronDown className="w-4 h-4" />
               </button>
 
               {/* Dropdown */}
-              <div className="absolute top-full right-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+              <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-[#d1d5db] rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                 <div className="p-2 space-y-1">
                   {columns.map((col) => (
                     <button
                       key={col.key}
                       onClick={() => toggleColumn(col.key)}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[#374151] hover:bg-[#f3f4f6] transition-colors"
                     >
                       {col.visible ? (
-                        <Eye className="w-4 h-4 text-emerald-400" />
+                        <Eye className="w-4 h-4 text-[#16a34a]" />
                       ) : (
-                        <EyeOff className="w-4 h-4 text-slate-600" />
+                        <EyeOff className="w-4 h-4 text-[#9ca3af]" />
                       )}
                       {col.label}
                     </button>
@@ -369,8 +370,8 @@ export default function SpecsPage() {
             </div>
 
             {/* Results count */}
-            <div className="flex items-center gap-2 text-sm text-slate-400">
-              <span className="text-emerald-400 font-semibold">{filteredData.length}</span>
+            <div className="flex items-center gap-2 text-sm text-[#6b7280]">
+              <span className="text-[#4f46e5] font-semibold">{filteredData.length}</span>
               <span>products</span>
             </div>
           </div>
@@ -378,20 +379,20 @@ export default function SpecsPage() {
       </div>
 
       {/* Table Container */}
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="relative bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden">
+      <div className="max-w-[1600px] mx-auto px-4 py-6">
+        <div className="relative bg-white border border-[#d1d5db] rounded-lg overflow-hidden shadow-sm">
           {/* Horizontal scroll container */}
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px]">
               {/* Sticky Header */}
               <thead className="sticky top-0 z-20">
-                <tr className="bg-slate-950/90 backdrop-blur-xl border-b border-white/10">
+                <tr className="bg-[#f9fafb] border-b border-[#e5e7eb]">
                   {visibleColumns.map((col, index) => (
                     <th
                       key={col.key}
-                      className={`px-4 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider ${
-                        index === 0 ? "sticky left-0 z-30 bg-slate-950/95" : ""
-                      } ${col.sortable ? "cursor-pointer hover:text-white" : ""}`}
+                      className={`px-4 py-3 text-left text-xs font-semibold text-[#374151] uppercase tracking-wider ${
+                        index === 0 ? "sticky left-0 z-30 bg-[#f9fafb]" : ""
+                      } ${col.sortable ? "cursor-pointer hover:text-[#4f46e5]" : ""}`}
                       style={{ minWidth: col.width }}
                       onClick={() => col.sortable && handleSort(col.key)}
                     >
@@ -401,223 +402,217 @@ export default function SpecsPage() {
                       </div>
                     </th>
                   ))}
-                  <th className="px-4 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider sticky right-0 z-30 bg-slate-950/95">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-[#374151] uppercase tracking-wider sticky right-0 z-30 bg-[#f9fafb]">
                     Actions
                   </th>
                 </tr>
               </thead>
 
               {/* Table Body */}
-              <tbody className="divide-y divide-white/5">
-                <AnimatePresence>
-                  {filteredData.map((product, index) => (
-                    <motion.tr
-                      key={product.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2, delay: index * 0.01 }}
-                      className="hover:bg-white/[0.02] transition-colors group"
-                    >
-                      {visibleColumns.map((col, colIndex) => {
-                        // Product Name Column (Sticky)
-                        if (col.key === "name") {
-                          return (
-                            <td
-                              key={col.key}
-                              className="px-4 py-4 sticky left-0 z-10 bg-slate-900/95 group-hover:bg-slate-900"
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center">
-                                  {product.category === "GPU" ? (
-                                    <HardDrive className="w-5 h-5 text-emerald-400" />
-                                  ) : (
-                                    <Cpu className="w-5 h-5 text-blue-400" />
-                                  )}
-                                </div>
-                                <div>
-                                  <Link
-                                    href={`/product/${product.id}`}
-                                    className="font-medium text-white hover:text-emerald-400 transition-colors"
-                                  >
-                                    {product.name}
-                                  </Link>
-                                  <p className="text-xs text-slate-500">{product.id}</p>
-                                </div>
-                              </div>
-                            </td>
-                          );
-                        }
-
-                        // Category Column
-                        if (col.key === "category") {
-                          return (
-                            <td key={col.key} className="px-4 py-4">
-                              <span
-                                className={`px-2 py-1 rounded text-xs font-medium ${
-                                  product.category === "GPU"
-                                    ? "bg-emerald-500/10 text-emerald-400"
-                                    : "bg-blue-500/10 text-blue-400"
-                                }`}
-                              >
-                                {product.category}
-                              </span>
-                            </td>
-                          );
-                        }
-
-                        // Brand Column
-                        if (col.key === "brand") {
-                          return (
-                            <td key={col.key} className="px-4 py-4">
-                              <span className="text-sm text-slate-300">{product.brand}</span>
-                            </td>
-                          );
-                        }
-
-                        // Price Column with color coding
-                        if (col.key === "price") {
-                          return (
-                            <td key={col.key} className="px-4 py-4">
-                              <div>
-                                <span className="font-semibold text-emerald-400">
-                                  {formatPrice(product.price)}
-                                </span>
-                                <MiniProgressBar
-                                  value={product.price}
-                                  max={maxValues.price}
-                                  color="amber"
-                                />
-                              </div>
-                            </td>
-                          );
-                        }
-
-                        // VRAM Column with progress bar
-                        if (col.key === "vram") {
-                          const vramValue = extractNumber(product.specs.vram);
-                          return (
-                            <td key={col.key} className="px-4 py-4">
-                              <div>
-                                <span className="text-sm text-slate-300 font-medium">
-                                  {vramValue > 0 ? `${vramValue}GB` : "N/A"}
-                                </span>
-                                {vramValue > 0 && (
-                                  <MiniProgressBar
-                                    value={vramValue}
-                                    max={maxValues.vram}
-                                    color="blue"
-                                  />
+              <tbody className="divide-y divide-[#e5e7eb]">
+                {filteredData.map((product) => (
+                  <tr
+                    key={product.id}
+                    className="hover:bg-[#f9fafb] transition-colors group"
+                  >
+                    {visibleColumns.map((col, colIndex) => {
+                      // Product Name Column (Sticky)
+                      if (col.key === "name") {
+                        return (
+                          <td
+                            key={col.key}
+                            className="px-4 py-3 sticky left-0 z-10 bg-white group-hover:bg-[#f9fafb]"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-[#f3f4f6] flex items-center justify-center">
+                                {product.category === "GPU" ? (
+                                  <Monitor className="w-5 h-5 text-[#4f46e5]" />
+                                ) : (
+                                  <Cpu className="w-5 h-5 text-[#0d9488]" />
                                 )}
                               </div>
-                            </td>
-                          );
-                        }
-
-                        // CUDA Cores Column with progress bar
-                        if (col.key === "cuda") {
-                          const cudaValue = extractNumber(product.specs.cuda);
-                          return (
-                            <td key={col.key} className="px-4 py-4">
                               <div>
-                                <span className="text-sm text-slate-300 font-medium">
-                                  {cudaValue > 0 ? cudaValue.toLocaleString() : "N/A"}
-                                </span>
-                                {cudaValue > 0 && (
-                                  <MiniProgressBar
-                                    value={cudaValue}
-                                    max={maxValues.cuda}
-                                    color="emerald"
-                                  />
-                                )}
-                              </div>
-                            </td>
-                          );
-                        }
-
-                        // TDP Column
-                        if (col.key === "tdp") {
-                          const tdpValue = extractNumber(product.specs.tdp);
-                          return (
-                            <td key={col.key} className="px-4 py-4">
-                              <div>
-                                <span className="text-sm text-slate-300">
-                                  {tdpValue > 0 ? `${tdpValue}W` : "N/A"}
-                                </span>
-                                {tdpValue > 0 && (
-                                  <MiniProgressBar
-                                    value={tdpValue}
-                                    max={maxValues.tdp}
-                                    color="amber"
-                                  />
-                                )}
-                              </div>
-                            </td>
-                          );
-                        }
-
-                        // AI Score Column
-                        if (col.key === "aiScore") {
-                          return (
-                            <td key={col.key} className="px-4 py-4">
-                              <div>
-                                <span
-                                  className={`font-semibold ${
-                                    product.aiScore >= 90
-                                      ? "text-emerald-400"
-                                      : product.aiScore >= 70
-                                      ? "text-blue-400"
-                                      : "text-slate-400"
-                                  }`}
+                                <Link
+                                  href={`/product/${product.id}`}
+                                  className="font-medium text-[#374151] hover:text-[#4f46e5] transition-colors text-sm"
                                 >
-                                  {product.aiScore}
-                                </span>
+                                  {product.name}
+                                </Link>
+                                <p className="text-xs text-[#9ca3af]">{product.id}</p>
+                              </div>
+                            </div>
+                          </td>
+                        );
+                      }
+
+                      // Category Column
+                      if (col.key === "category") {
+                        return (
+                          <td key={col.key} className="px-4 py-3">
+                            <span
+                              className={`px-2 py-1 rounded text-xs font-medium ${
+                                product.category === "GPU"
+                                  ? "bg-[#f5f3ff] text-[#4f46e5]"
+                                  : "bg-[#f0fdf4] text-[#16a34a]"
+                              }`}
+                            >
+                              {product.category}
+                            </span>
+                          </td>
+                        );
+                      }
+
+                      // Brand Column
+                      if (col.key === "brand") {
+                        return (
+                          <td key={col.key} className="px-4 py-3">
+                            <span className="text-sm text-[#374151]">{product.brand}</span>
+                          </td>
+                        );
+                      }
+
+                      // Price Column with progress bar
+                      if (col.key === "price") {
+                        return (
+                          <td key={col.key} className="px-4 py-3">
+                            <div>
+                              <span className="font-semibold text-[#0d9488] text-sm">
+                                {formatPrice(product.price)}
+                              </span>
+                              <MiniProgressBar
+                                value={product.price}
+                                max={maxValues.price}
+                                color="amber"
+                              />
+                            </div>
+                          </td>
+                        );
+                      }
+
+                      // VRAM Column with progress bar
+                      if (col.key === "vram") {
+                        const vramValue = extractNumber(product.specs.vram);
+                        return (
+                          <td key={col.key} className="px-4 py-3">
+                            <div>
+                              <span className="text-sm text-[#374151] font-medium">
+                                {vramValue > 0 ? `${vramValue}GB` : "N/A"}
+                              </span>
+                              {vramValue > 0 && (
                                 <MiniProgressBar
-                                  value={product.aiScore}
-                                  max={100}
+                                  value={vramValue}
+                                  max={maxValues.vram}
+                                  color="blue"
+                                />
+                              )}
+                            </div>
+                          </td>
+                        );
+                      }
+
+                      // CUDA Cores Column with progress bar
+                      if (col.key === "cuda") {
+                        const cudaValue = extractNumber(product.specs.cuda);
+                        return (
+                          <td key={col.key} className="px-4 py-3">
+                            <div>
+                              <span className="text-sm text-[#374151] font-medium">
+                                {cudaValue > 0 ? cudaValue.toLocaleString() : "N/A"}
+                              </span>
+                              {cudaValue > 0 && (
+                                <MiniProgressBar
+                                  value={cudaValue}
+                                  max={maxValues.cuda}
                                   color="emerald"
                                 />
-                              </div>
-                            </td>
-                          );
-                        }
+                              )}
+                            </div>
+                          </td>
+                        );
+                      }
 
-                        // Architecture Column
-                        if (col.key === "architecture") {
-                          return (
-                            <td key={col.key} className="px-4 py-4">
-                              <span className="text-sm text-slate-300">
-                                {product.specs.architecture || "N/A"}
+                      // TDP Column
+                      if (col.key === "tdp") {
+                        const tdpValue = extractNumber(product.specs.tdp);
+                        return (
+                          <td key={col.key} className="px-4 py-3">
+                            <div>
+                              <span className="text-sm text-[#374151]">
+                                {tdpValue > 0 ? `${tdpValue}W` : "N/A"}
                               </span>
-                            </td>
-                          );
-                        }
+                              {tdpValue > 0 && (
+                                <MiniProgressBar
+                                  value={tdpValue}
+                                  max={maxValues.tdp}
+                                  color="amber"
+                                />
+                              )}
+                            </div>
+                          </td>
+                        );
+                      }
 
-                        return <td key={col.key} className="px-4 py-4">-</td>;
-                      })}
+                      // AI Score Column
+                      if (col.key === "aiScore") {
+                        return (
+                          <td key={col.key} className="px-4 py-3">
+                            <div>
+                              <span
+                                className={`font-semibold text-sm ${
+                                  product.aiScore >= 90
+                                    ? "text-[#16a34a]"
+                                    : product.aiScore >= 70
+                                    ? "text-[#4f46e5]"
+                                    : "text-[#6b7280]"
+                                }`}
+                              >
+                                {product.aiScore}
+                              </span>
+                              <MiniProgressBar
+                                value={product.aiScore}
+                                max={100}
+                                color="emerald"
+                              />
+                            </div>
+                          </td>
+                        );
+                      }
 
-                      {/* Actions Column (Sticky Right) */}
-                      <td className="px-4 py-4 sticky right-0 z-10 bg-slate-900/95 group-hover:bg-slate-900">
-                        <div className="flex items-center gap-2">
-                          <Link
-                            href={`/product/${product.id}`}
-                            className="px-3 py-1.5 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 rounded text-sm font-medium transition-colors"
-                          >
-                            View
-                          </Link>
-                          <a
-                            href={product.affiliateLinks.amazon}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-3 py-1.5 bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 rounded text-sm transition-colors"
-                          >
-                            <DollarSign className="w-4 h-4" />
-                          </a>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </AnimatePresence>
+                      // Architecture Column
+                      if (col.key === "architecture") {
+                        return (
+                          <td key={col.key} className="px-4 py-3">
+                            <span className="text-sm text-[#374151]">
+                              {product.specs.architecture || "N/A"}
+                            </span>
+                          </td>
+                        );
+                      }
+
+                      return <td key={col.key} className="px-4 py-3">-</td>;
+                    })}
+
+                    {/* Actions Column (Sticky Right) */}
+                    <td className="px-4 py-3 sticky right-0 z-10 bg-white group-hover:bg-[#f9fafb]">
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/product/${product.id}`}
+                          className="px-3 py-1.5 bg-[#4f46e5] text-white hover:bg-[#4338ca] rounded text-sm font-medium transition-colors"
+                        >
+                          View
+                        </Link>
+                        <a
+                          href={product.affiliateLinks.amazon}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 bg-[#f3f4f6] text-[#374151] hover:bg-[#e5e7eb] rounded text-sm transition-colors"
+                        >
+                          <DollarSign className="w-4 h-4" />
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -625,9 +620,9 @@ export default function SpecsPage() {
           {/* Empty State */}
           {filteredData.length === 0 && (
             <div className="text-center py-16">
-              <Search className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-300 mb-2">No products found</h3>
-              <p className="text-sm text-slate-500">Try adjusting your search or filters</p>
+              <Search className="w-12 h-12 text-[#d1d5db] mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-[#374151] mb-2">No products found</h3>
+              <p className="text-sm text-[#6b7280]">Try adjusting your search or filters</p>
             </div>
           )}
         </div>
